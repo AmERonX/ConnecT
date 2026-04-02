@@ -96,7 +96,7 @@ function renderTeams(data) {
                       .map(
                         (member) => `
                           <div class="member-row">
-                            <div class="avatar">${esc(initials(member))}</div>
+                            <div class="avatar">${esc(initials(member.name))}</div>
                             <div>
                               <div class="member-name">${esc(member.name)}</div>
                             </div>
