@@ -12,12 +12,14 @@ class Database:
         self.service_pool: Optional[asyncpg.Pool] = None
 
     async def connect(self) -> None:
-        self.pool = await asyncpg.create_pool(dsn=settings.supabase_db_url, min_size=1, max_size=10)
-        self.service_pool = await asyncpg.create_pool(
-            dsn=settings.supabase_service_db_url,
-            min_size=1,
-            max_size=5,
-        )
+        if not self.pool:
+            self.pool = await asyncpg.create_pool(dsn=settings.supabase_db_url, min_size=1, max_size=10)
+        if not self.service_pool:
+            self.service_pool = await asyncpg.create_pool(
+                dsn=settings.supabase_service_db_url,
+                min_size=1,
+                max_size=5,
+            )
 
     async def disconnect(self) -> None:
         if self.pool:
@@ -30,7 +32,7 @@ class Database:
     @asynccontextmanager
     async def connection(self, user_id: Optional[str] = None) -> AsyncIterator[asyncpg.Connection]:
         if not self.pool:
-            raise RuntimeError("Database pool is not initialized")
+            await self.connect()
         conn = await self.pool.acquire()
         try:
             if user_id:
@@ -48,7 +50,7 @@ class Database:
     @asynccontextmanager
     async def service_connection(self) -> AsyncIterator[asyncpg.Connection]:
         if not self.service_pool:
-            raise RuntimeError("Service database pool is not initialized")
+            await self.connect()
         conn = await self.service_pool.acquire()
         try:
             yield conn
