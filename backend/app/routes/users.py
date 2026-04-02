@@ -23,8 +23,11 @@ async def get_me(auth: AuthContext = Depends(get_auth_context)):
             auth.user_id,
         )
 
-        if not row:
-            await ensure_user_exists(conn, auth.user_id, auth.email)
+    if not row:
+        async with db.service_connection() as service_conn:
+            await ensure_user_exists(service_conn, auth.user_id, auth.email)
+
+        async with db.connection(auth.user_id) as conn:
             row = await fetchrow_dict(
                 conn,
                 """
@@ -47,9 +50,10 @@ async def get_me(auth: AuthContext = Depends(get_auth_context)):
 async def patch_me(body: UserUpdateRequest, auth: AuthContext = Depends(get_auth_context)):
     payload = body.model_dump(exclude_none=True)
 
-    async with db.connection(auth.user_id) as conn:
-        await ensure_user_exists(conn, auth.user_id, auth.email)
+    async with db.service_connection() as service_conn:
+        await ensure_user_exists(service_conn, auth.user_id, auth.email)
 
+    async with db.connection(auth.user_id) as conn:
         if payload:
             assignments = []
             values = []
