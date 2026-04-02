@@ -85,7 +85,7 @@ async def list_my_feedback(limit: int = Query(default=20, ge=1, le=100), auth: A
             FROM match_feedback mf
             JOIN match_participants mp_sender ON mp_sender.match_id = mf.match_id
             JOIN project_ideas sender_idea ON sender_idea.id = mp_sender.idea_id
-            JOIN users sender ON sender.id = sender_idea.user_id
+            JOIN public_profiles sender ON sender.id = sender_idea.user_id
             JOIN match_participants mp_me ON mp_me.match_id = mf.match_id
             JOIN project_ideas my_idea ON my_idea.id = mp_me.idea_id
             WHERE mf.signal = 'connection_sent'
@@ -124,7 +124,7 @@ async def list_my_feedback(limit: int = Query(default=20, ge=1, le=100), auth: A
             JOIN project_ideas sender_idea ON sender_idea.id = mp_sender.idea_id
             JOIN match_participants mp_receiver ON mp_receiver.match_id = mf.match_id
             JOIN project_ideas receiver_idea ON receiver_idea.id = mp_receiver.idea_id
-            JOIN users receiver ON receiver.id = receiver_idea.user_id
+            JOIN public_profiles receiver ON receiver.id = receiver_idea.user_id
             WHERE mf.signal = 'connection_sent'
               AND mf.actor_user_id = $1
               AND sender_idea.user_id = $1

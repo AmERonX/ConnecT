@@ -73,9 +73,9 @@ async def list_matches_for_idea(
                 pi.problem,
                 pi.commitment_hrs,
                 pi.user_id AS owner_id,
-                u.name AS owner_name,
-                u.github_url,
-                u.has_existing_team,
+                p.name AS owner_name,
+                p.github_url,
+                p.has_existing_team,
                 pi.is_active
             FROM matches m
             JOIN match_participants mp ON mp.match_id = m.id
@@ -86,7 +86,7 @@ async def list_matches_for_idea(
                 WHERE mp2.match_id = m.id AND mp2.idea_id != $1
                 LIMIT 1
             ) pi ON true
-            JOIN users u ON u.id = pi.user_id
+            JOIN public_profiles p ON p.id = pi.user_id
             WHERE mp.idea_id = $1
               AND m.final_score IS NOT NULL
               AND m.final_score >= $2

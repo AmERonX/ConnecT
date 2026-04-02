@@ -25,11 +25,11 @@ async def _team_with_members(conn, team_id: str) -> dict:
     members = await fetch_dict(
         conn,
         """
-        SELECT u.id, u.name
+        SELECT p.id, p.name
         FROM team_members tm
-        JOIN users u ON u.id = tm.user_id
+        JOIN public_profiles p ON p.id = tm.user_id
         WHERE tm.team_id = $1
-        ORDER BY u.name ASC
+        ORDER BY p.name ASC
         """,
         team_id,
     )
@@ -138,7 +138,7 @@ async def list_teams(auth: AuthContext = Depends(get_auth_context)):
             FROM match_feedback mf
             JOIN match_participants mp_sender ON mp_sender.match_id = mf.match_id
             JOIN project_ideas sender_idea ON sender_idea.id = mp_sender.idea_id
-            JOIN users sender ON sender.id = sender_idea.user_id
+            JOIN public_profiles sender ON sender.id = sender_idea.user_id
             JOIN match_participants mp_me ON mp_me.match_id = mf.match_id
             JOIN project_ideas my_idea ON my_idea.id = mp_me.idea_id
             WHERE mf.signal = 'connection_sent'
@@ -176,7 +176,7 @@ async def list_teams(auth: AuthContext = Depends(get_auth_context)):
             JOIN project_ideas sender_idea ON sender_idea.id = mp_sender.idea_id
             JOIN match_participants mp_receiver ON mp_receiver.match_id = mf.match_id
             JOIN project_ideas receiver_idea ON receiver_idea.id = mp_receiver.idea_id
-            JOIN users receiver ON receiver.id = receiver_idea.user_id
+            JOIN public_profiles receiver ON receiver.id = receiver_idea.user_id
             WHERE mf.signal = 'connection_sent'
               AND mf.actor_user_id = $1
               AND sender_idea.user_id = $1

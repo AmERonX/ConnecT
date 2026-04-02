@@ -13,21 +13,96 @@ AS $$
     );
 $$;
 
+CREATE OR REPLACE VIEW public_profiles AS
+SELECT
+    id,
+    name,
+    github_url,
+    has_existing_team,
+    team_size_preference,
+    working_style
+FROM users;
+
+CREATE OR REPLACE VIEW public_user_skills AS
+SELECT
+    user_id,
+    skill_name,
+    level,
+    verified
+FROM user_skills;
+
+CREATE OR REPLACE VIEW public_past_projects AS
+SELECT
+    user_id,
+    title,
+    description,
+    verified,
+    completed_at
+FROM past_projects;
+
+REVOKE ALL ON TABLE public_profiles FROM PUBLIC;
+REVOKE ALL ON TABLE public_profiles FROM anon;
+REVOKE ALL ON TABLE public_profiles FROM authenticated;
+GRANT SELECT ON TABLE public_profiles TO authenticated;
+
+REVOKE ALL ON TABLE public_user_skills FROM PUBLIC;
+REVOKE ALL ON TABLE public_user_skills FROM anon;
+REVOKE ALL ON TABLE public_user_skills FROM authenticated;
+GRANT SELECT ON TABLE public_user_skills TO authenticated;
+
+REVOKE ALL ON TABLE public_past_projects FROM PUBLIC;
+REVOKE ALL ON TABLE public_past_projects FROM anon;
+REVOKE ALL ON TABLE public_past_projects FROM authenticated;
+GRANT SELECT ON TABLE public_past_projects TO authenticated;
+
 DROP POLICY IF EXISTS "users: read own" ON users;
 DROP POLICY IF EXISTS "users: authenticated can read" ON users;
-CREATE POLICY "users: authenticated can read"
+CREATE POLICY "users: read own"
 ON users FOR SELECT TO authenticated
-USING (true);
+USING (id = auth.uid());
 
 DROP POLICY IF EXISTS "users: insert own" ON users;
 CREATE POLICY "users: insert own"
 ON users FOR INSERT TO authenticated
 WITH CHECK (id = auth.uid());
 
+DROP POLICY IF EXISTS "users: update own" ON users;
+CREATE POLICY "users: update own"
+ON users FOR UPDATE TO authenticated
+USING (id = auth.uid());
+
 DROP POLICY IF EXISTS "users: delete own" ON users;
 CREATE POLICY "users: delete own"
 ON users FOR DELETE TO authenticated
 USING (id = auth.uid());
+
+DROP POLICY IF EXISTS "skills: read own" ON user_skills;
+DROP POLICY IF EXISTS "skills: read any" ON user_skills;
+CREATE POLICY "skills: read own"
+ON user_skills FOR SELECT TO authenticated
+USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "past_projects: read own" ON past_projects;
+DROP POLICY IF EXISTS "past_projects: read any" ON past_projects;
+CREATE POLICY "past_projects: read own"
+ON past_projects FOR SELECT TO authenticated
+USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "past_projects: insert own" ON past_projects;
+DROP POLICY IF EXISTS "past_projects: manage own" ON past_projects;
+CREATE POLICY "past_projects: insert own"
+ON past_projects FOR INSERT TO authenticated
+WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "past_projects: update own" ON past_projects;
+CREATE POLICY "past_projects: update own"
+ON past_projects FOR UPDATE TO authenticated
+USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "past_projects: delete own" ON past_projects;
+CREATE POLICY "past_projects: delete own"
+ON past_projects FOR DELETE TO authenticated
+USING (user_id = auth.uid());
 
 DROP POLICY IF EXISTS "feedback: read own" ON match_feedback;
 DROP POLICY IF EXISTS "feedback: participants can read" ON match_feedback;

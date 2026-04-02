@@ -145,6 +145,48 @@ WHERE is_stale = true;
 CREATE INDEX idx_match_participants_idea_id
 ON match_participants (idea_id);
 
+CREATE OR REPLACE VIEW public_profiles AS
+SELECT
+    id,
+    name,
+    github_url,
+    has_existing_team,
+    team_size_preference,
+    working_style
+FROM users;
+
+CREATE OR REPLACE VIEW public_user_skills AS
+SELECT
+    user_id,
+    skill_name,
+    level,
+    verified
+FROM user_skills;
+
+CREATE OR REPLACE VIEW public_past_projects AS
+SELECT
+    user_id,
+    title,
+    description,
+    verified,
+    completed_at
+FROM past_projects;
+
+REVOKE ALL ON TABLE public_profiles FROM PUBLIC;
+REVOKE ALL ON TABLE public_profiles FROM anon;
+REVOKE ALL ON TABLE public_profiles FROM authenticated;
+GRANT SELECT ON TABLE public_profiles TO authenticated;
+
+REVOKE ALL ON TABLE public_user_skills FROM PUBLIC;
+REVOKE ALL ON TABLE public_user_skills FROM anon;
+REVOKE ALL ON TABLE public_user_skills FROM authenticated;
+GRANT SELECT ON TABLE public_user_skills TO authenticated;
+
+REVOKE ALL ON TABLE public_past_projects FROM PUBLIC;
+REVOKE ALL ON TABLE public_past_projects FROM anon;
+REVOKE ALL ON TABLE public_past_projects FROM authenticated;
+GRANT SELECT ON TABLE public_past_projects TO authenticated;
+
 ALTER TABLE users              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_ideas      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE idea_embeddings    ENABLE ROW LEVEL SECURITY;
@@ -172,9 +214,9 @@ AS $$
     );
 $$;
 
-CREATE POLICY "users: authenticated can read"
+CREATE POLICY "users: read own"
 ON users FOR SELECT TO authenticated
-USING (true);
+USING (id = auth.uid());
 
 CREATE POLICY "users: update own"
 ON users FOR UPDATE TO authenticated
@@ -200,9 +242,9 @@ CREATE POLICY "ideas: update own"
 ON project_ideas FOR UPDATE TO authenticated
 USING (user_id = auth.uid());
 
-CREATE POLICY "skills: read any"
+CREATE POLICY "skills: read own"
 ON user_skills FOR SELECT TO authenticated
-USING (true);
+USING (user_id = auth.uid());
 
 CREATE POLICY "skills: insert own"
 ON user_skills FOR INSERT TO authenticated
@@ -216,13 +258,21 @@ CREATE POLICY "skills: delete own"
 ON user_skills FOR DELETE TO authenticated
 USING (user_id = auth.uid());
 
-CREATE POLICY "past_projects: read any"
+CREATE POLICY "past_projects: read own"
 ON past_projects FOR SELECT TO authenticated
-USING (true);
+USING (user_id = auth.uid());
 
-CREATE POLICY "past_projects: manage own"
+CREATE POLICY "past_projects: insert own"
 ON past_projects FOR INSERT TO authenticated
 WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "past_projects: update own"
+ON past_projects FOR UPDATE TO authenticated
+USING (user_id = auth.uid());
+
+CREATE POLICY "past_projects: delete own"
+ON past_projects FOR DELETE TO authenticated
+USING (user_id = auth.uid());
 
 CREATE POLICY "matches: participants can read"
 ON matches FOR SELECT TO authenticated
