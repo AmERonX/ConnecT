@@ -6,241 +6,230 @@
   <title>ConnecT - Build Better Teams</title>
   <meta name="description" content="ConnecT helps students find collaborators around shared ideas, compatible skills, and realistic commitments.">
   <link rel="stylesheet" href="styles/main.css">
+  <style>
+    /* Specific Home Page Overrides to match Screenshot */
+    body {
+      background: #0a0a0a;
+      color: #fafafa;
+    }
+    
+    .landing-hero {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      background: radial-gradient(circle at center, rgba(30, 41, 59, 1) 0%, rgba(10, 10, 10, 1) 60%);
+      padding: var(--space-6) var(--space-3);
+    }
+
+    .particles {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .hero-brand-mark {
+      width: 48px;
+      height: 48px;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: var(--space-4);
+      box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      line-height: 1.1;
+      max-width: 800px;
+      margin-bottom: var(--space-3);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: var(--space-5);
+      line-height: 1.6;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .landing-section {
+      padding: var(--space-10) 0;
+      background: #121212;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .section-header-center {
+      text-align: center;
+      margin-bottom: var(--space-6);
+    }
+
+    .section-header-center h2 {
+      font-size: 2.25rem;
+      margin-bottom: var(--space-1);
+    }
+
+    .section-header-center p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--space-3);
+      padding: 0 var(--space-3);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .feature-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: var(--space-4);
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .feature-box:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .feature-icon-wrapper {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-3);
+      color: white;
+    }
+
+    .icon-blue { background: #3b82f6; }
+    .icon-pink { background: #d946ef; }
+    .icon-green { background: #22c55e; }
+    .icon-orange { background: #ea580c; }
+
+    .feature-box h3 {
+      font-size: 1.125rem;
+      margin-bottom: 8px;
+    }
+
+    .feature-box p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Arrow icon for buttons */
+    .arrow-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+  </style>
 </head>
 <body>
-  <nav class="navbar" id="navbar">
-    <div class="container">
-      <a href="index.html" class="nav-brand" aria-label="ConnecT home">
-        <span class="brand-mark">C</span>
-        <span class="nav-logo">ConnecT</span>
-      </a>
-      <div class="nav-links">
-        <a href="#why" class="nav-link">Why ConnecT</a>
-        <a href="#system" class="nav-link">Design System</a>
-        <a href="#flow" class="nav-link">How It Works</a>
-      </div>
-      <div class="nav-actions">
-        <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
-        <a href="signup.html" class="btn btn-primary btn-sm">Create account</a>
-      </div>
-    </div>
-  </nav>
 
   <main>
-    <section class="hero">
+    <section class="landing-hero">
+      <div class="particles"></div>
+      
+      <div class="hero-brand-mark">C</div>
+      <h1 class="hero-title">Find Your Perfect<br>PBL Team at GEHU</h1>
+      <p class="hero-subtitle">ConnecT — your idea space. Your ideal teammates.</p>
+      
+      <div class="hero-buttons">
+        <a href="signup.html" class="btn btn-primary btn-xl">
+          Get Started
+          <svg class="arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+        <a href="login.html" class="btn btn-ghost btn-xl" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">Sign In</a>
+      </div>
+    </section>
+
+    <section class="landing-section">
       <div class="container">
-        <div class="hero-shell">
-          <div class="hero-copy">
-            <span class="eyebrow">
-              <span class="eyebrow-dot"></span>
-              Student collaboration, not profile scrolling
-            </span>
-            <h1 class="hero-title">Find the <span class="text-gradient">right people</span> for the work you actually want to build.</h1>
-            <p class="hero-subtitle">
-              ConnecT matches students around concrete ideas, shared pace, and complementary strengths. Describe the problem, get an AI-normalized summary, and connect with builders who close the gaps in your team.
-            </p>
-            <div class="hero-actions">
-              <a href="signup.html" class="btn btn-primary btn-xl">Start building</a>
-              <a href="#flow" class="btn btn-ghost btn-xl">See the flow</a>
+        <div class="section-header-center">
+          <h2>Everything You Need</h2>
+          <p>Built with modern features to make team finding effortless</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-box">
+            <div class="feature-icon-wrapper icon-blue">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             </div>
-            <div class="hero-metrics">
-              <div class="hero-metric">
-                <span class="hero-metric-value">Idea first</span>
-                <span>Matching begins with the problem, not vanity signals.</span>
-              </div>
-              <div class="hero-metric">
-                <span class="hero-metric-value">Human approval</span>
-                <span>Nothing is stored until the canonical summary looks right to you.</span>
-              </div>
-              <div class="hero-metric">
-                <span class="hero-metric-value">Real constraints</span>
-                <span>Hours per week, duration, skills, and momentum stay visible.</span>
-              </div>
+            <h3>Team Management</h3>
+            <p>Create and manage teams of 3-4 members with automatic PBL rule enforcement</p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-icon-wrapper icon-pink">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             </div>
+            <h3>Smart Recruitment</h3>
+            <p>Post openings, review applications, and find the perfect teammates</p>
           </div>
 
-          <div class="hero-panel fade-in">
-            <div class="hero-preview">
-              <span class="preview-label">Live matching preview</span>
-              <div class="preview-head">
-                <div>
-                  <p class="muted">Suggested collaborator</p>
-                  <h2>Adaptive learning team</h2>
-                </div>
-                <div class="preview-score">
-                  <span class="muted">Match</span>
-                  <strong class="text-gradient">91%</strong>
-                </div>
-              </div>
-              <div class="preview-card">
-                <div class="preview-meta">
-                  <span class="avatar">AM</span>
-                  <div>
-                    <div class="preview-name">Aanya Mehta</div>
-                    <div class="preview-role">NLP + product systems · 10 hours/week</div>
-                  </div>
-                </div>
-                <p class="preview-summary">
-                  Building an adaptive study partner platform that pairs students by complementary weak areas, course overlap, and learning style signals.
-                </p>
-                <div class="match-tags">
-                  <span class="tag-chip">Education</span>
-                  <span class="tag-chip">NLP</span>
-                  <span class="tag-chip">Matching</span>
-                  <span class="tag-chip">Python</span>
-                </div>
-                <div class="preview-actions">
-                  <a href="signup.html" class="btn btn-primary btn-sm">Connect</a>
-                  <a href="browse.html" class="btn btn-ghost btn-sm">Browse more</a>
-                </div>
-              </div>
+          <div class="feature-box">
+            <div class="feature-icon-wrapper icon-green">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
             </div>
+            <h3>Built-in Messaging</h3>
+            <p>DM, team chats, and recruitment discussions - all in one place</p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-icon-wrapper icon-orange">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </div>
+            <h3>Privacy First</h3>
+            <p>No phone sharing. Your contact info stays private and secure</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="page-section" id="why">
+    <!-- Adding a minor footer space to match the screenshot bottom crop -->
+    <section class="landing-section" style="padding-top: 0;">
       <div class="container">
-        <div class="section-header">
-          <div class="section-copy">
-            <span class="eyebrow">Product direction</span>
-            <h2 class="section-title">A calmer, sharper collaboration experience.</h2>
-            <p class="section-subtitle">
-              The redesign treats ConnecT as a focused product for student builders: editorial spacing, neutral surfaces, one strong accent, and layouts that privilege decisions over decoration.
-            </p>
-          </div>
-        </div>
-        <div class="feature-grid stagger">
-          <article class="feature-card slide-up">
-            <div class="feature-icon">01</div>
-            <h3>Idea-led onboarding</h3>
-            <p>The first meaningful action is describing the project clearly, so the product immediately understands intent and direction.</p>
-          </article>
-          <article class="feature-card slide-up">
-            <div class="feature-icon">02</div>
-            <h3>Readable information hierarchy</h3>
-            <p>Large headings, generous spacing, and quiet surfaces keep dense collaboration data easy to scan on every screen size.</p>
-          </article>
-          <article class="feature-card slide-up">
-            <div class="feature-icon">03</div>
-            <h3>Fewer bright signals, better emphasis</h3>
-            <p>Muted neutrals and a restrained teal-blue accent make states feel premium and intentional instead of noisy.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="page-section" id="system">
-      <div class="container">
-        <div class="section-header">
-          <div class="section-copy">
-            <span class="eyebrow">Design system first</span>
-            <h2 class="section-title">One system across public, auth, and app surfaces.</h2>
-            <p class="section-subtitle">
-              Colors, type, spacing, radii, shadows, and interaction states now behave consistently across every page in the frontend.
-            </p>
-          </div>
-        </div>
-        <div class="system-grid stagger">
-          <article class="system-card slide-up">
-            <h3>Palette</h3>
-            <ul>
-              <li><span>Primary</span><span class="text-accent">Teal slate</span></li>
-              <li><span>Accent</span><span>Muted cobalt</span></li>
-              <li><span>Background</span><span>Warm ivory</span></li>
-              <li><span>Text</span><span>Deep ink</span></li>
-            </ul>
-          </article>
-          <article class="system-card slide-up">
-            <h3>Type scale</h3>
-            <ul>
-              <li><span>H1</span><span>2.75rem - 5.5rem</span></li>
-              <li><span>H2</span><span>2rem - 3.5rem</span></li>
-              <li><span>Body</span><span>1rem / 1.6</span></li>
-              <li><span>Small</span><span>0.875rem</span></li>
-            </ul>
-          </article>
-          <article class="system-card slide-up">
-            <h3>Spacing</h3>
-            <ul>
-              <li><span>Base grid</span><span>8px rhythm</span></li>
-              <li><span>Section</span><span>72-96px</span></li>
-              <li><span>Card padding</span><span>20-32px</span></li>
-              <li><span>Gap scale</span><span>8-64px</span></li>
-            </ul>
-          </article>
-          <article class="system-card slide-up">
-            <h3>Components</h3>
-            <ul>
-              <li><span>Buttons</span><span>Primary, secondary, ghost</span></li>
-              <li><span>Lists</span><span>Rows and table shell</span></li>
-              <li><span>Inputs</span><span>Custom states</span></li>
-              <li><span>Modal</span><span>Shared overlay pattern</span></li>
-            </ul>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="page-section" id="flow">
-      <div class="container">
-        <div class="section-header">
-          <div class="section-copy">
-            <span class="eyebrow">How it works</span>
-            <h2 class="section-title">Three steps from raw idea to active team.</h2>
-            <p class="section-subtitle">
-              The workflow is simple on purpose. Every step has one job: clarify the idea, confirm it, then move into connection and delivery.
-            </p>
-          </div>
-        </div>
-        <div class="steps-grid stagger">
-          <article class="step-card slide-up">
-            <span class="step-index">1</span>
-            <h3>Capture the idea</h3>
-            <p>Write the problem, your proposed solution, and how you expect the project to work. Tags and commitment keep the brief realistic.</p>
-          </article>
-          <article class="step-card slide-up">
-            <span class="step-index">2</span>
-            <h3>Review the AI summary</h3>
-            <p>The system extracts a canonical summary. If the idea is vague, you get targeted feedback instead of a low-quality save.</p>
-          </article>
-          <article class="step-card slide-up">
-            <span class="step-index">3</span>
-            <h3>Connect and form teams</h3>
-            <p>Browse ranked matches, send requests, accept a connection, and move directly into a team view with visible member context.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="page-section">
-      <div class="container">
-        <div class="cta-panel">
-          <div>
-            <span class="eyebrow">Ready to use it</span>
-            <h2 class="section-title">Start with a project worth building.</h2>
-            <p class="section-subtitle">Create an account, describe the idea, and let the redesigned flow take you through approval, matching, and team creation.</p>
-          </div>
-          <div class="hero-actions">
-            <a href="signup.html" class="btn btn-primary btn-lg">Create account</a>
-            <a href="login.html" class="btn btn-ghost btn-lg">Log in</a>
-          </div>
-        </div>
+         <div class="section-header-center">
+            <h2 style="font-size: 1.8rem; margin-top: var(--space-5);">How It Works</h2>
+            <p>Get started in minutes</p>
+         </div>
+         <div style="background: rgba(255,255,255,0.02); max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.05); padding: var(--space-4); border-radius: 12px; display: flex; align-items: center; gap: 16px;">
+            <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold;">1</div>
+            <strong style="flex: 1;">Sign Up & Verify</strong>
+            <svg style="color: var(--success); width: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+         </div>
       </div>
     </section>
   </main>
-
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-shell">
-        <div class="nav-brand">
-          <span class="brand-mark">C</span>
-          <span class="nav-logo">ConnecT</span>
-        </div>
-        <p>Student collaboration platform for finding the right teammate around the right idea.</p>
-      </div>
-    </div>
-  </footer>
 </body>
 </html>

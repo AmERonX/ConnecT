@@ -5,153 +5,383 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - ConnecT</title>
   <link rel="stylesheet" href="styles/main.css">
+  <style>
+    /* Specific Linkup/ConnecT Dashboard UI Overrides */
+    body { background: #0a0a0a; color: #fff; }
+    
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Base */
+    .sidebar {
+      width: 260px;
+      background: #0a0a0a;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--accent-gradient);
+      display: inline-flex; justify-content: center; align-items: center;
+      font-weight: bold; color: white;
+    }
+
+    .nav-logo { font-size: 1.25rem; font-weight: 700; }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-secondary);
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+    }
+
+    .sidebar-link.active {
+      color: var(--primary);
+      position: relative;
+    }
+
+    .sidebar-link.active::before {
+      content: '';
+      position: absolute; left: -12px; top: 15%; height: 70%; width: 4px;
+      background: var(--primary);
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Topbar */
+    .topbar-simple {
+      height: 72px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 0 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: #0a0a0a;
+    }
+
+    .top-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .top-user .avatar {
+      width: 32px; height: 32px;
+      background: #333; border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 0.8rem; font-weight: bold; color: white;
+    }
+
+    .app-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #0a0a0a;
+    }
+
+    .main-content {
+      padding: 40px;
+      max-width: 1000px;
+    }
+
+    /* Banners */
+    .banner-welcome {
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+      border-radius: 16px;
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      color: white;
+    }
+
+    .banner-welcome h1 { font-size: 2rem; margin-bottom: 8px; }
+    .banner-welcome p { color: rgba(255,255,255,0.8); }
+
+    .banner-icon {
+      width: 80px; height: 80px;
+      background: rgba(0,0,0,0.15); border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+    }
+
+    .banner-warning {
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 24px 32px;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .banner-warning-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fafafa;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .banner-warning-head svg { color: var(--primary); }
+
+    .banner-warning p { color: var(--text-secondary); font-size: 0.95rem; }
+
+    /* Number Cards */
+    .number-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .num-card {
+      background: #121212;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .num-card-icon { color: var(--text-muted); margin-bottom: 16px; }
+
+    .num-value { font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .num-label { font-size: 0.9rem; color: var(--text-secondary); }
+
+    /* Quick Actions */
+    .qa-section h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; }
+    .qa-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .qa-card {
+      background: #121212;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .qa-card:hover { background: #18181b; border-color: rgba(255,255,255,0.1); }
+
+    .qa-icon {
+      width: 48px; height: 48px;
+      background: rgba(249, 115, 22, 0.1);
+      color: var(--primary);
+      border-radius: 12px;
+      display: flex; justify-content: center; align-items: center;
+      box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+    }
+
+    .qa-info strong { display: block; font-size: 0.95rem; margin-bottom: 4px; }
+    .qa-info span { font-size: 0.85rem; color: var(--text-secondary); }
+
+    /* Verification Float */
+    .verify-float {
+      margin: auto 16px 24px 16px;
+      background: linear-gradient(180deg, #18181b, #121212);
+      border: 1px solid rgba(249, 115, 22, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .verify-float p { font-size: 0.85rem; color: #a1a1aa; margin-bottom: 12px; line-height: 1.4; }
+    .verify-float a { color: var(--primary); font-size: 0.85rem; font-weight: 600; }
+
+  </style>
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar">
       <div class="sidebar-header">
-        <a href="dashboard.html" class="nav-brand" aria-label="ConnecT dashboard">
+        <a href="dashboard.html" class="nav-brand">
           <span class="brand-mark">C</span>
           <span class="nav-logo">ConnecT</span>
         </a>
       </div>
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link active">
-          <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6.5h7v11H4zM13 4h7v6h-7zM13 12h7v8h-7z"/></svg>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6.5h7v11H4zM13 4h7v6h-7zM13 12h7v8h-7z"/></svg>
           Dashboard
         </a>
-        <a href="browse.html" class="sidebar-link">
-          <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          Browse teammates
-        </a>
-        <a href="ideas.html" class="sidebar-link">
-          <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3a6 6 0 00-3.3 11.01c.8.53 1.3 1.42 1.3 2.38V17h4v-.61c0-.96.5-1.85 1.3-2.38A6 6 0 0012 3zM9.5 21h5"/></svg>
-          My ideas
-        </a>
         <a href="teams.html" class="sidebar-link">
-          <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7a3 3 0 116 0 3 3 0 01-6 0zm-4 12a6 6 0 1112 0H4zm13-8a2.5 2.5 0 110-5 2.5 2.5 0 010 5zm2 8a4 4 0 00-3-3.87"/></svg>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           Teams
         </a>
+        <a href="ideas.html" class="sidebar-link">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Recruitment
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+          Messages
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Events
+        </a>
         <a href="profile.html" class="sidebar-link">
-          <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 9a7 7 0 0114 0"/></svg>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           Profile
         </a>
       </nav>
-      <div class="sidebar-footer">
-        <a href="index.html" class="sidebar-link">
-          <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6l-6 6 6 6M3 12h12m6 9V3"/></svg>
-          Log out
-        </a>
+
+      <div class="verify-float">
+        <p>Verify your GEHU email to unlock recruitment features</p>
+        <a href="#">Verify Now →</a>
       </div>
     </aside>
 
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
     <div class="app-main">
-      <header class="topbar">
-        <div class="topbar-left">
-          <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Open navigation">
-            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
-          </button>
-          <div>
-            <div class="topbar-title">Workspace dashboard</div>
-            <p class="muted">Track ideas, requests, and teams in one place.</p>
-          </div>
-        </div>
-        <div class="topbar-right">
-          <a href="idea-editor.html" class="btn btn-primary btn-sm">New idea</a>
-          <div class="avatar is-loading" aria-hidden="true"></div>
+      <header class="topbar-simple">
+        <div class="top-user">
+          <svg width="20" height="20" style="color: var(--text-muted); margin-right: 12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <div class="avatar" id="user-initial">R</div>
+          <span style="font-weight: 500; font-size: 0.95rem;">Ron</span>
         </div>
       </header>
 
       <main class="main-content">
-        <section class="welcome-banner fade-in">
+        
+        <div class="banner-welcome">
           <div>
-            <span class="eyebrow">Overview</span>
-            <h1 class="welcome-title">Workspace overview</h1>
-            <p class="welcome-sub">Your ideas, requests, teams, and recent activity will appear here once the dashboard finishes loading.</p>
+            <h1>Welcome back, Ron! 👋</h1>
+            <p>Please complete your profile to unlock all features</p>
           </div>
-          <div class="welcome-avatar is-loading" aria-hidden="true"></div>
-        </section>
+          <div class="banner-icon">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          </div>
+        </div>
 
-        <section class="stats-row stagger" aria-label="Summary stats">
-          <article class="stat-card slide-up">
-            <div class="stat-icon">I</div>
-            <div class="stat-copy">
-              <div class="stat-value">-</div>
-              <div class="stat-label">Active ideas</div>
-            </div>
-          </article>
-          <article class="stat-card slide-up">
-            <div class="stat-icon">S</div>
-            <div class="stat-copy">
-              <div class="stat-value">-</div>
-              <div class="stat-label">Requests sent</div>
-            </div>
-          </article>
-          <article class="stat-card slide-up">
-            <div class="stat-icon">R</div>
-            <div class="stat-copy">
-              <div class="stat-value">-</div>
-              <div class="stat-label">Requests received</div>
-            </div>
-          </article>
-          <article class="stat-card slide-up">
-            <div class="stat-icon">T</div>
-            <div class="stat-copy">
-              <div class="stat-value">-</div>
-              <div class="stat-label">Active teams</div>
-            </div>
-          </article>
-        </section>
+        <div class="banner-warning">
+          <div class="banner-warning-head">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            Complete Your Profile
+          </div>
+          <p>Add your year, section, and skills to start creating or joining teams</p>
+          <div>
+            <a href="profile.html" class="btn btn-primary btn-sm" style="border-radius: 8px;">Complete Now →</a>
+          </div>
+        </div>
 
-        <section class="dashboard-grid">
-          <div class="quick-actions">
-            <div class="page-head">
-              <div class="page-head-copy">
-                <h2 class="page-title">Keep moving</h2>
-                <p class="page-subtitle">The most common next actions are surfaced here so you can move from drafting to matching quickly.</p>
+        <div class="number-grid">
+          <div class="num-card">
+            <svg class="num-card-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <div class="num-value">0</div>
+            <div class="num-label">Your Teams</div>
+          </div>
+          <div class="num-card">
+            <svg class="num-card-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <div class="num-value">0</div>
+            <div class="num-label">Applications Sent</div>
+          </div>
+          <div class="num-card">
+            <svg class="num-card-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+            <div class="num-value">0</div>
+            <div class="num-label">Unread Notifications</div>
+          </div>
+          <div class="num-card">
+            <svg class="num-card-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <div class="num-value">0</div>
+            <div class="num-label">Open Positions</div>
+          </div>
+        </div>
+
+        <div class="qa-section">
+          <h2>Quick Actions</h2>
+          <div class="qa-grid">
+            <div class="qa-card" onclick="location.href='teams.html'">
+              <div class="qa-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              </div>
+              <div class="qa-info">
+                <strong>Browse Teams</strong>
+                <span>Find your perfect team</span>
               </div>
             </div>
-            <div class="quick-grid stagger">
-              <a href="idea-editor.html" class="quick-card slide-up">
-                <div class="quick-icon">+</div>
-                <div class="quick-label">Create a new idea</div>
-                <div class="quick-desc">Capture a project brief and run AI review.</div>
-              </a>
-              <a href="browse.html" class="quick-card slide-up">
-                <div class="quick-icon">B</div>
-                <div class="quick-label">Browse ranked matches</div>
-                <div class="quick-desc">Compare complementary builders by score and commitment.</div>
-              </a>
-              <a href="teams.html" class="quick-card slide-up">
-                <div class="quick-icon">T</div>
-                <div class="quick-label">Review active teams</div>
-                <div class="quick-desc">See members, pending requests, and formed groups.</div>
-              </a>
+
+            <div class="qa-card" onclick="location.href='idea-editor.html'">
+              <div class="qa-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
+              </div>
+              <div class="qa-info">
+                <strong>Create Team</strong>
+                <span>Start your own team</span>
+              </div>
+            </div>
+
+            <div class="qa-card" onclick="location.href='browse.html'">
+              <div class="qa-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              </div>
+              <div class="qa-info">
+                <strong>Find Opportunities</strong>
+                <span>Browse open positions</span>
+              </div>
             </div>
           </div>
+        </div>
 
-          <aside class="activity-panel card">
-            <div class="section-header">
-              <div class="section-copy">
-                <span class="eyebrow">Recent activity</span>
-                <h3 class="section-title">What changed recently</h3>
-              </div>
-            </div>
-            <div class="activity-list stagger">
-              <div class="activity-item slide-up">
-                <div class="activity-dot"></div>
-                <span>Loading recent activity.</span>
-              </div>
-            </div>
-          </aside>
-        </section>
       </main>
     </div>
   </div>
 
+  <!-- Keep scripts to fetch real user name dynamically -->
   <script src="js/config.js"></script>
-  <script type="module" src="js/pages/dashboard.js"></script>
+  <script type="module">
+    import { apiFetch } from './js/api.js';
+    import { initials } from './js/utils.js';
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const user = await apiFetch('/users/me');
+        if (user && user.full_name) {
+          const first = user.full_name.split(' ')[0];
+          document.querySelector('h1').innerHTML = `Welcome back, ${first}! 👋`;
+          document.querySelector('span[style="font-weight: 500; font-size: 0.95rem;"]').innerText = first;
+          document.getElementById('user-initial').innerText = initials(user.full_name);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  </script>
 </body>
 </html>
