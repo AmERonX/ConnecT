@@ -4,6 +4,4 @@
 window.CONNECT_SUPABASE_URL = window.CONNECT_SUPABASE_URL || 'https://jkqkalodktcomicypjeb.supabase.co';
 window.CONNECT_SUPABASE_ANON_KEY = window.CONNECT_SUPABASE_ANON_KEY || 'sb_publishable_6qbzCQNjnXF3Q0je0EpaUA_kWjxYrZC';
 
-// TODO: Change this to your deployed backend URL before going live
-// e.g. 'https://connect-api.onrender.com' or your Railway/Fly URL
-window.CONNECT_API_BASE = window.CONNECT_API_BASE || 'http://127.0.0.1:8000';
+window.CONNECT_API_BASE = window.CONNECT_API_BASE || 'https://connec-t-backend.vercel.app';
