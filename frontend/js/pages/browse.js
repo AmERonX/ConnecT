@@ -11,6 +11,15 @@ function esc(value) {
     .replaceAll("'", '&#039;');
 }
 
+function initials(name) {
+  return (name || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join('');
+}
+
 function freshnessChip(item) {
   if (item.is_stale) {
     return '<span class="badge badge-computing"><span class="badge-dot"></span> Updating</span>';
@@ -18,8 +27,14 @@ function freshnessChip(item) {
   return '<span class="badge badge-fresh"><span class="badge-dot"></span> Fresh</span>';
 }
 
-await requireAuth();
+const session = await requireAuth();
 bindSidebar();
+
+const avatar = document.querySelector('.topbar-right .avatar');
+if (avatar) {
+  avatar.textContent = initials(session?.user?.user_metadata?.name || 'Builder');
+  avatar.classList.remove('is-loading');
+}
 
 const ideaFilter = document.getElementById('idea-filter');
 const sortFilter = document.getElementById('sort-filter');
@@ -88,7 +103,6 @@ function render(items) {
             <div class="match-tags">${freshnessChip(item)}</div>
             <div class="match-actions">
               <button class="btn btn-primary btn-sm" data-action="connect" data-match-id="${item.match_id}">Connect</button>
-              <a class="btn btn-ghost btn-sm" href="#" title="Coming soon" data-action="view-placeholder">View</a>
             </div>
           </div>
         </article>
@@ -110,12 +124,6 @@ function render(items) {
         button.removeAttribute('disabled');
         showPageError(error.message || 'Failed to send request.');
       }
-    });
-  }
-
-  for (const link of grid.querySelectorAll('[data-action="view-placeholder"]')) {
-    link.addEventListener('click', (event) => {
-      event.preventDefault();
     });
   }
 }

@@ -11,8 +11,23 @@ function esc(value) {
     .replaceAll("'", '&#039;');
 }
 
-await requireAuth();
+function initials(name) {
+  return (name || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join('');
+}
+
+const session = await requireAuth();
 bindSidebar();
+
+const avatar = document.querySelector('.topbar-right .avatar');
+if (avatar) {
+  avatar.textContent = initials(session?.user?.user_metadata?.name || 'Builder');
+  avatar.classList.remove('is-loading');
+}
 
 const container = document.querySelector('.teams-grid');
 const mainContent = document.querySelector('.main-content');
@@ -53,42 +68,44 @@ function renderTeams(data) {
         ? teams
             .map(
               (team) => `
-                <article class="team-row slide-up">
-                  <div class="team-info">
-                    <div class="team-icon-wrap">T</div>
-                    <div>
-                      <div class="team-name">${esc(team.name || 'Unnamed Team')}</div>
-                      <div class="team-idea">${team.members.length} members</div>
+                <article class="team-cluster slide-up">
+                  <div class="team-row">
+                    <div class="team-info">
+                      <div class="team-icon-wrap">T</div>
+                      <div>
+                        <div class="team-name">${esc(team.name || 'Unnamed Team')}</div>
+                        <div class="team-idea">Always-expanded member list for quick scanning</div>
+                      </div>
+                    </div>
+                    <div class="team-meta">
+                      <div class="meta-item">
+                        <span class="meta-value">${team.members.length}</span>
+                        <span class="meta-label">Members</span>
+                      </div>
+                      <div class="meta-item">
+                        <span class="meta-value">${new Date(team.formed_at).toLocaleDateString()}</span>
+                        <span class="meta-label">Formed</span>
+                      </div>
                     </div>
                   </div>
-                  <div class="team-meta">
-                    <div class="meta-item">
-                      <span class="meta-value">${team.members.length}</span>
-                      <span class="meta-label">Members</span>
+                  <section class="team-detail-panel">
+                    <div class="detail-header">
+                      <div class="detail-title">Members</div>
                     </div>
-                    <div class="meta-item">
-                      <span class="meta-value">${new Date(team.formed_at).toLocaleDateString()}</span>
-                      <span class="meta-label">Formed</span>
-                    </div>
-                  </div>
-                </article>
-                <section class="team-detail-panel">
-                  <div class="detail-header">
-                    <div class="detail-title">Members</div>
-                  </div>
-                  ${team.members
-                    .map(
-                      (member) => `
-                        <div class="member-row">
-                          <div class="avatar">${esc(member.name.charAt(0).toUpperCase())}</div>
-                          <div>
-                            <div class="member-name">${esc(member.name)}</div>
+                    ${team.members
+                      .map(
+                        (member) => `
+                          <div class="member-row">
+                            <div class="avatar">${esc(member.name.charAt(0).toUpperCase())}</div>
+                            <div>
+                              <div class="member-name">${esc(member.name)}</div>
+                            </div>
                           </div>
-                        </div>
-                      `,
-                    )
-                    .join('')}
-                </section>
+                        `,
+                      )
+                      .join('')}
+                  </section>
+                </article>
               `,
             )
             .join('')

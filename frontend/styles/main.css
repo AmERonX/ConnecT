@@ -2331,3 +2331,57 @@ p {
 .teams-grid > .empty-state {
   grid-column: 1 / -1;
 }
+
+
+[hidden] {
+  display: none !important;
+}
+
+.tag-chip-label {
+  line-height: 1;
+}
+
+.tag-chip-remove {
+  padding: 0;
+  cursor: pointer;
+}
+
+.avatar.is-loading,
+.profile-avatar-lg.is-loading,
+.welcome-avatar.is-loading {
+  color: transparent;
+  background: linear-gradient(135deg, rgba(35, 36, 35, 0.08), rgba(35, 76, 207, 0.1));
+  box-shadow: none;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.convo-state {
+  display: grid;
+  gap: 14px;
+}
+
+.convo-state-center {
+  min-height: 360px;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.editor-inline-error {
+  margin-bottom: 14px;
+}
+
+.team-cluster {
+  display: grid;
+  gap: 12px;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}

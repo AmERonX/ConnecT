@@ -9,6 +9,7 @@ bindSidebar();
 const params = new URLSearchParams(window.location.search);
 const ideaId = params.get('id');
 const isEditMode = Boolean(ideaId);
+const stateIds = ['state-empty', 'state-loading', 'state-revision', 'state-approved', 'state-saving'];
 
 const form = document.getElementById('idea-form');
 const analyzeBtn = document.getElementById('submit-btn');
@@ -26,18 +27,13 @@ let persistedSnapshot = null;
 let approvedIntentSnapshot = null;
 
 function showState(id) {
-  const ids = ['state-empty', 'state-loading', 'state-revision', 'state-approved', 'state-saving'];
-  for (const stateId of ids) {
+  for (const stateId of stateIds) {
     const el = document.getElementById(stateId);
     if (!el) continue;
-    el.classList.remove('visible');
-    el.style.display = 'none';
+    const isActive = stateId === id;
+    el.hidden = !isActive;
+    el.classList.toggle('visible', isActive);
   }
-
-  const active = document.getElementById(id);
-  if (!active) return;
-  active.style.display = id === 'state-loading' || id === 'state-saving' ? 'flex' : 'block';
-  active.classList.add('visible');
 }
 
 function setStep(step) {
@@ -78,22 +74,55 @@ function sameIntent(a, b) {
   );
 }
 
+function buildAlert(iconText, message) {
+  const wrapper = document.createDocumentFragment();
+  const icon = document.createElement('span');
+  const text = document.createElement('span');
+  icon.textContent = iconText;
+  text.textContent = message;
+  wrapper.append(icon, text);
+  return wrapper;
+}
+
 function showInlineError(message) {
   const panel = document.getElementById('convo-panel');
   let el = document.getElementById('editor-error');
+  if (!panel) return;
+
   if (!el) {
     el = document.createElement('div');
     el.id = 'editor-error';
-    el.className = 'alert alert-error';
-    el.style.marginBottom = '14px';
+    el.className = 'alert alert-error editor-inline-error';
+    el.setAttribute('role', 'alert');
     panel.prepend(el);
   }
-  el.innerHTML = `<span>!</span><span>${message}</span>`;
+
+  el.replaceChildren(buildAlert('!', message));
 }
 
 function clearInlineError() {
   const el = document.getElementById('editor-error');
   if (el) el.remove();
+}
+
+function renderFeedback(items) {
+  if (!feedbackListEl) return;
+  feedbackListEl.replaceChildren();
+
+  for (const text of items) {
+    const item = document.createElement('li');
+    item.className = 'feedback-item';
+
+    const bullet = document.createElement('span');
+    bullet.className = 'feedback-bullet';
+    bullet.textContent = '→';
+
+    const copy = document.createElement('span');
+    copy.textContent = text;
+
+    item.append(bullet, copy);
+    feedbackListEl.append(item);
+  }
 }
 
 function syncCanonicalValidity() {
@@ -107,7 +136,7 @@ function syncCanonicalValidity() {
     if (canonicalTextEl) {
       canonicalTextEl.textContent = '';
     }
-    if (document.getElementById('state-approved')?.classList.contains('visible')) {
+    if (!document.getElementById('state-approved')?.hidden) {
       setStep(1);
       showState('state-empty');
     }
@@ -207,10 +236,7 @@ async function analyze() {
     approvedIntentSnapshot = null;
 
     if (response.status === 'needs_revision') {
-      const items = response.feedback || [];
-      feedbackListEl.innerHTML = items
-        .map((text) => `<li class="feedback-item"><span class="feedback-bullet">-></span>${text}</li>`)
-        .join('');
+      renderFeedback(response.feedback || []);
       setStep(2);
       showState('state-revision');
       return;

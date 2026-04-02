@@ -11,6 +11,15 @@ function esc(value) {
     .replaceAll("'", '&#039;');
 }
 
+function initials(name) {
+  return (name || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join('');
+}
+
 function freshnessBadge(freshness) {
   const map = {
     fresh: { cls: 'badge-fresh', label: 'Fresh' },
@@ -22,8 +31,14 @@ function freshnessBadge(freshness) {
   return `<span class="badge ${chosen.cls}"><span class="badge-dot"></span> ${chosen.label}</span>`;
 }
 
-await requireAuth();
+const session = await requireAuth();
 bindSidebar();
+
+const avatar = document.querySelector('.topbar-right .avatar');
+if (avatar) {
+  avatar.textContent = initials(session?.user?.user_metadata?.name || 'Builder');
+  avatar.classList.remove('is-loading');
+}
 
 const grid = document.querySelector('.ideas-grid');
 

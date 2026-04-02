@@ -7,7 +7,14 @@ bindSidebar();
 
 const editBtn = document.getElementById('edit-btn');
 const deleteBtn = document.getElementById('delete-account-btn');
+const addSkillBtn = document.getElementById('add-skill-btn');
 const modalRoot = document.getElementById('modal-root');
+const mainContent = document.querySelector('.main-content');
+const topbarSubtitle = document.querySelector('.topbar-left .muted');
+
+let activeDialog = null;
+let previousFocusedElement = null;
+let currentProfile = null;
 
 function esc(value) {
   return String(value || '')
@@ -16,6 +23,23 @@ function esc(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
+}
+
+function safeHttpUrl(value) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.href;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }
 
 function initials(name) {
@@ -34,43 +58,183 @@ function setProfileField(selector, value) {
   }
 }
 
-function closeModal() {
+function setAvatarText(selector, value) {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  el.textContent = value;
+  el.classList.remove('is-loading');
+}
+
+function setProfileActionsDisabled(disabled) {
+  for (const button of [editBtn, deleteBtn, addSkillBtn]) {
+    if (!button) continue;
+    if (disabled) {
+      button.setAttribute('disabled', 'disabled');
+    } else {
+      button.removeAttribute('disabled');
+    }
+  }
+}
+
+function getFocusableElements(root) {
+  if (!root) return [];
+
+  const selectors = [
+    'button:not([disabled])',
+    '[href]',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(', ');
+
+  return [...root.querySelectorAll(selectors)].filter((el) => !el.hasAttribute('hidden') && el.getClientRects().length > 0);
+}
+
+function handleModalKeydown(event) {
+  if (!modalRoot?.classList.contains('open') || !activeDialog) {
+    return;
+  }
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeModal();
+    return;
+  }
+
+  if (event.key !== 'Tab') {
+    return;
+  }
+
+  const focusable = getFocusableElements(activeDialog);
+  if (!focusable.length) {
+    event.preventDefault();
+    activeDialog.focus();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const active = document.activeElement;
+
+  if (event.shiftKey && active === first) {
+    event.preventDefault();
+    last.focus();
+    return;
+  }
+
+  if (!event.shiftKey && active === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function closeModal({ restoreFocus = true } = {}) {
   if (!modalRoot) return;
+
   modalRoot.classList.remove('open');
   modalRoot.setAttribute('aria-hidden', 'true');
   modalRoot.innerHTML = '';
+  modalRoot.onclick = null;
   document.body.classList.remove('modal-open');
+  document.removeEventListener('keydown', handleModalKeydown);
+
+  activeDialog = null;
+  const focusTarget = previousFocusedElement;
+  previousFocusedElement = null;
+
+  if (!restoreFocus) {
+    return;
+  }
+
+  if (focusTarget instanceof HTMLElement && document.contains(focusTarget)) {
+    focusTarget.focus();
+    return;
+  }
+
+  if (editBtn && document.contains(editBtn) && !editBtn.hasAttribute('disabled')) {
+    editBtn.focus();
+  }
 }
 
-function openModal(markup) {
+function openModal(markup, { initialFocusSelector } = {}) {
   if (!modalRoot) return;
+
+  previousFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   modalRoot.innerHTML = markup;
   modalRoot.classList.add('open');
   modalRoot.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
+
+  activeDialog = modalRoot.querySelector('[role="dialog"]');
+  if (activeDialog && !activeDialog.hasAttribute('tabindex')) {
+    activeDialog.setAttribute('tabindex', '-1');
+  }
 
   modalRoot.onclick = (event) => {
     if (event.target === modalRoot || event.target.closest('[data-close-modal]')) {
       closeModal();
     }
   };
+
+  document.removeEventListener('keydown', handleModalKeydown);
+  document.addEventListener('keydown', handleModalKeydown);
+
+  const requested = initialFocusSelector && activeDialog ? activeDialog.querySelector(initialFocusSelector) : null;
+  const firstFocusable = getFocusableElements(activeDialog)[0] || activeDialog;
+  const focusTarget = requested || firstFocusable;
+
+  queueMicrotask(() => {
+    focusTarget?.focus();
+  });
 }
 
 function showMessageModal(title, message) {
-  openModal(`
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title" id="modal-title">${esc(title)}</h2>
-          <p class="modal-subtitle">${esc(message)}</p>
+  openModal(
+    `
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title" id="modal-title">${esc(title)}</h2>
+            <p class="modal-subtitle">${esc(message)}</p>
+          </div>
+          <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
         </div>
-        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+        <div class="modal-actions">
+          <button class="btn btn-primary btn-sm" type="button" data-close-modal>Close</button>
+        </div>
       </div>
-      <div class="modal-actions">
-        <button class="btn btn-primary btn-sm" type="button" data-close-modal>Close</button>
+    `,
+    { initialFocusSelector: '.modal-close' },
+  );
+}
+
+function renderProfileErrorState(message) {
+  closeModal({ restoreFocus: false });
+  setProfileActionsDisabled(true);
+
+  if (topbarSubtitle) {
+    topbarSubtitle.textContent = 'Profile data could not be loaded.';
+  }
+
+  if (!mainContent) {
+    return;
+  }
+
+  mainContent.innerHTML = `
+    <section class="profile-section profile-load-error">
+      <div class="empty-state">
+        <div class="empty-icon">!</div>
+        <div class="empty-title">Unable to load profile</div>
+        <div class="empty-text">${esc(message || 'Unknown error')}</div>
+        <button class="btn btn-primary btn-sm" type="button" id="retry-profile-load">Try again</button>
       </div>
-    </div>
-  `);
+    </section>
+  `;
+
+  document.getElementById('retry-profile-load')?.addEventListener('click', () => {
+    window.location.reload();
+  });
 }
 
 async function loadProfile() {
@@ -81,9 +245,10 @@ async function loadProfile() {
     apiFetch('/users/me/skills'),
   ]);
 
+  setProfileActionsDisabled(false);
   setProfileField('.profile-name', user.name);
   setProfileField('.profile-email', user.email);
-  setProfileField('.profile-avatar-lg', initials(user.name));
+  setAvatarText('.profile-avatar-lg', initials(user.name));
 
   const stats = document.querySelectorAll('.p-stat-val');
   if (stats[0]) stats[0].textContent = String((teams.teams || []).length);
@@ -111,8 +276,9 @@ async function loadProfile() {
 
   const githubRow = document.querySelector('#links-section .social-value');
   if (githubRow) {
-    githubRow.innerHTML = user.github_url
-      ? `<a href="${esc(user.github_url)}" target="_blank" rel="noreferrer">${esc(user.github_url)}</a>`
+    const githubUrl = safeHttpUrl(user.github_url);
+    githubRow.innerHTML = githubUrl
+      ? `<a href="${esc(githubUrl)}" target="_blank" rel="noreferrer">${esc(githubUrl)}</a>`
       : '<span class="muted">Not added</span>';
   }
 
@@ -130,50 +296,51 @@ async function loadProfile() {
   return user;
 }
 
-let currentProfile = null;
-
 const VALID_STYLES = ['async', 'sync', 'flexible'];
 const VALID_LEVELS = ['beginner', 'intermediate', 'advanced'];
 
 function openEditProfileModal() {
   if (!currentProfile) return;
 
-  openModal(`
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title" id="modal-title">Edit profile</h2>
-          <p class="modal-subtitle">Update the details teammates use to understand your working style.</p>
+  openModal(
+    `
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title" id="modal-title">Edit profile</h2>
+            <p class="modal-subtitle">Update the details teammates use to understand your working style.</p>
+          </div>
+          <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
         </div>
-        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+        <form class="modal-form" id="edit-profile-form">
+          <div class="form-group">
+            <label class="form-label" for="profile-name-input">Name</label>
+            <input class="form-input" id="profile-name-input" value="${esc(currentProfile.name || '')}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profile-github-input">GitHub URL</label>
+            <input class="form-input" id="profile-github-input" value="${esc(currentProfile.github_url || '')}" placeholder="https://github.com/username">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profile-team-size-input">Preferred team size</label>
+            <input class="form-input" id="profile-team-size-input" type="number" min="1" max="20" value="${currentProfile.team_size_preference || ''}" placeholder="3">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profile-working-style-input">Working style</label>
+            <select class="form-select" id="profile-working-style-input">
+              <option value="">Choose a style</option>
+              ${VALID_STYLES.map((style) => `<option value="${style}" ${currentProfile.working_style === style ? 'selected' : ''}>${style}</option>`).join('')}
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
+            <button class="btn btn-primary btn-sm" type="submit">Save changes</button>
+          </div>
+        </form>
       </div>
-      <form class="modal-form" id="edit-profile-form">
-        <div class="form-group">
-          <label class="form-label" for="profile-name-input">Name</label>
-          <input class="form-input" id="profile-name-input" value="${esc(currentProfile.name || '')}">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="profile-github-input">GitHub URL</label>
-          <input class="form-input" id="profile-github-input" value="${esc(currentProfile.github_url || '')}" placeholder="https://github.com/username">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="profile-team-size-input">Preferred team size</label>
-          <input class="form-input" id="profile-team-size-input" type="number" min="1" max="20" value="${currentProfile.team_size_preference || ''}" placeholder="3">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="profile-working-style-input">Working style</label>
-          <select class="form-select" id="profile-working-style-input">
-            <option value="">Choose a style</option>
-            ${VALID_STYLES.map((style) => `<option value="${style}" ${currentProfile.working_style === style ? 'selected' : ''}>${style}</option>`).join('')}
-          </select>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
-          <button class="btn btn-primary btn-sm" type="submit">Save changes</button>
-        </div>
-      </form>
-    </div>
-  `);
+    `,
+    { initialFocusSelector: '#profile-name-input' },
+  );
 
   document.getElementById('edit-profile-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -208,34 +375,37 @@ function openEditProfileModal() {
 }
 
 function openAddSkillModal() {
-  openModal(`
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title" id="modal-title">Add skill</h2>
-          <p class="modal-subtitle">Make it easier for others to understand what you can contribute.</p>
+  openModal(
+    `
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title" id="modal-title">Add skill</h2>
+            <p class="modal-subtitle">Make it easier for others to understand what you can contribute.</p>
+          </div>
+          <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
         </div>
-        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+        <form class="modal-form" id="add-skill-form">
+          <div class="form-group">
+            <label class="form-label" for="skill-name-input">Skill name</label>
+            <input class="form-input" id="skill-name-input" placeholder="Python, React, UX research">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="skill-level-input">Skill level</label>
+            <select class="form-select" id="skill-level-input">
+              <option value="">Optional</option>
+              ${VALID_LEVELS.map((level) => `<option value="${level}">${level}</option>`).join('')}
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
+            <button class="btn btn-primary btn-sm" type="submit">Add skill</button>
+          </div>
+        </form>
       </div>
-      <form class="modal-form" id="add-skill-form">
-        <div class="form-group">
-          <label class="form-label" for="skill-name-input">Skill name</label>
-          <input class="form-input" id="skill-name-input" placeholder="Python, React, UX research">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="skill-level-input">Skill level</label>
-          <select class="form-select" id="skill-level-input">
-            <option value="">Optional</option>
-            ${VALID_LEVELS.map((level) => `<option value="${level}">${level}</option>`).join('')}
-          </select>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
-          <button class="btn btn-primary btn-sm" type="submit">Add skill</button>
-        </div>
-      </form>
-    </div>
-  `);
+    `,
+    { initialFocusSelector: '#skill-name-input' },
+  );
 
   document.getElementById('add-skill-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -262,21 +432,24 @@ function openAddSkillModal() {
 }
 
 function openRemoveSkillModal(skillId, skillLabel) {
-  openModal(`
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title" id="modal-title">Remove skill</h2>
-          <p class="modal-subtitle">${esc(skillLabel)} will be removed from your public profile.</p>
+  openModal(
+    `
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title" id="modal-title">Remove skill</h2>
+            <p class="modal-subtitle">${esc(skillLabel)} will be removed from your public profile.</p>
+          </div>
+          <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
         </div>
-        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+        <div class="modal-actions">
+          <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
+          <button class="btn btn-danger btn-sm" type="button" id="confirm-remove-skill">Remove</button>
+        </div>
       </div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
-        <button class="btn btn-danger btn-sm" type="button" id="confirm-remove-skill">Remove</button>
-      </div>
-    </div>
-  `);
+    `,
+    { initialFocusSelector: '[data-close-modal]' },
+  );
 
   document.getElementById('confirm-remove-skill')?.addEventListener('click', async () => {
     try {
@@ -290,25 +463,28 @@ function openRemoveSkillModal(skillId, skillLabel) {
 }
 
 function openDeleteAccountModal() {
-  openModal(`
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title" id="modal-title">Delete account</h2>
-          <p class="modal-subtitle">This permanently deletes your account, ideas, and team data.</p>
+  openModal(
+    `
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title" id="modal-title">Delete account</h2>
+            <p class="modal-subtitle">This permanently deletes your account, ideas, and team data.</p>
+          </div>
+          <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
         </div>
-        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+        <div class="alert alert-error">
+          <span>!</span>
+          <span>This action cannot be undone.</span>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
+          <button class="btn btn-danger btn-sm" type="button" id="confirm-delete-account">Delete account</button>
+        </div>
       </div>
-      <div class="alert alert-error">
-        <span>!</span>
-        <span>This action cannot be undone.</span>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
-        <button class="btn btn-danger btn-sm" type="button" id="confirm-delete-account">Delete account</button>
-      </div>
-    </div>
-  `);
+    `,
+    { initialFocusSelector: '[data-close-modal]' },
+  );
 
   document.getElementById('confirm-delete-account')?.addEventListener('click', async () => {
     try {
@@ -323,20 +499,10 @@ function openDeleteAccountModal() {
 
 editBtn?.addEventListener('click', openEditProfileModal);
 deleteBtn?.addEventListener('click', openDeleteAccountModal);
-document.getElementById('add-skill-btn')?.addEventListener('click', openAddSkillModal);
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && modalRoot?.classList.contains('open')) {
-    closeModal();
-  }
-});
+addSkillBtn?.addEventListener('click', openAddSkillModal);
 
 try {
   currentProfile = await loadProfile();
 } catch (error) {
-  const skillsSection = document.getElementById('skills-section');
-  if (skillsSection) {
-    skillsSection.innerHTML = `<div class="alert alert-error"><span>!</span><span>${esc(error.message || 'Failed to load profile')}</span></div>`;
-  }
+  renderProfileErrorState(error.message || 'Failed to load profile');
 }
-

@@ -131,29 +131,29 @@
               <span>AI review</span>
             </div>
 
-            <div class="convo-empty default-visible" id="state-empty">
+            <div class="convo-state convo-state-center visible" id="state-empty">
               <div class="convo-icon">...</div>
               <div class="loading-text">Waiting for your brief</div>
               <div class="loading-subtext">Once you submit the form, the system will generate a cleaner canonical summary for matching.</div>
             </div>
 
-            <div class="loading-state" id="state-loading">
+            <div class="convo-state convo-state-center" id="state-loading" hidden>
               <div class="spinner spinner-lg"></div>
               <div class="loading-text">Analyzing your idea...</div>
               <div class="loading-subtext">Reviewing the problem, solution, approach, and tags to produce a high-signal summary.</div>
             </div>
 
-            <div class="revision-state" id="state-revision">
+            <div class="convo-state" id="state-revision" hidden>
               <div class="alert alert-warn">
                 <span>!</span>
                 <span>The summary needs more clarity before it can be approved.</span>
               </div>
               <ul class="feedback-list" id="feedback-list">
-                <li class="feedback-item"><span class="feedback-bullet">-</span>Feedback will appear here.</li>
+                <li class="feedback-item"><span class="feedback-bullet">-</span><span>Feedback will appear here.</span></li>
               </ul>
             </div>
 
-            <div class="approved-state" id="state-approved">
+            <div class="convo-state" id="state-approved" hidden>
               <div class="alert alert-success">
                 <span>OK</span>
                 <span>The canonical summary is ready for review.</span>
@@ -165,7 +165,7 @@
               </div>
             </div>
 
-            <div class="saving-state" id="state-saving">
+            <div class="convo-state convo-state-center" id="state-saving" hidden>
               <div class="spinner spinner-lg"></div>
               <div class="loading-text">Saving your idea...</div>
               <div class="loading-subtext">The project will start matching against the rest of the network immediately after save.</div>
@@ -180,4 +180,3 @@
   <script type="module" src="js/pages/idea-editor.js"></script>
 </body>
 </html>
-

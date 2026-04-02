@@ -31,6 +31,7 @@ const avatarText = initials(metaName);
 
 for (const avatar of document.querySelectorAll('.avatar, .welcome-avatar')) {
   avatar.textContent = avatarText;
+  avatar.classList.remove('is-loading');
 }
 
 const welcomeTitle = document.querySelector('.welcome-title');

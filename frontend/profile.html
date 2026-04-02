@@ -59,17 +59,17 @@
           </div>
         </div>
         <div class="topbar-right">
-          <button class="btn btn-primary btn-sm" id="edit-btn">Edit profile</button>
+          <button class="btn btn-primary btn-sm" id="edit-btn" disabled>Edit profile</button>
         </div>
       </header>
 
       <main class="main-content">
         <section class="profile-banner fade-in">
-          <div class="profile-avatar-lg">..</div>
+          <div class="profile-avatar-lg is-loading" aria-hidden="true"></div>
           <div>
             <span class="eyebrow">Public profile</span>
-            <h1 class="profile-name">Loading profile</h1>
-            <p class="profile-email">Fetching user data...</p>
+            <h1 class="profile-name">Profile overview</h1>
+            <p class="profile-email">Loading your account details.</p>
           </div>
           <span class="badge badge-neutral">Student builder</span>
         </section>
@@ -92,7 +92,7 @@
         <section class="profile-section" id="skills-section">
           <div class="ps-header">
             <div class="ps-title">Skills and technologies</div>
-            <button class="btn btn-ghost btn-sm" id="add-skill-btn">Add skill</button>
+            <button class="btn btn-ghost btn-sm" id="add-skill-btn" disabled>Add skill</button>
           </div>
           <div class="skills-grid"></div>
         </section>
@@ -135,7 +135,7 @@
           </div>
           <p>This permanently deletes your profile, ideas, and team relationships. There is no recovery path.</p>
           <div class="form-actions">
-            <button class="btn btn-danger btn-sm" id="delete-account-btn">Delete account</button>
+            <button class="btn btn-danger btn-sm" id="delete-account-btn" disabled>Delete account</button>
           </div>
         </section>
       </main>

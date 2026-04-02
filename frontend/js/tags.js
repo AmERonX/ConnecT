@@ -2,8 +2,22 @@ function createChip(label) {
   const chip = document.createElement('span');
   chip.className = 'tag-chip';
   chip.dataset.value = label;
-  chip.innerHTML = `${label} <span class="tag-chip-remove" aria-label="Remove tag">✕</span>`;
-  chip.querySelector('.tag-chip-remove')?.addEventListener('click', () => chip.remove());
+
+  const text = document.createElement('span');
+  text.className = 'tag-chip-label';
+  text.textContent = label;
+
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.className = 'tag-chip-remove';
+  removeBtn.setAttribute('aria-label', `Remove ${label} tag`);
+  removeBtn.textContent = '×';
+  removeBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    chip.remove();
+  });
+
+  chip.append(text, removeBtn);
   return chip;
 }
 
