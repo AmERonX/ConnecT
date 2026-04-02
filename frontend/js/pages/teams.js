@@ -74,7 +74,7 @@ function renderTeams(data) {
                       <div class="team-icon-wrap">T</div>
                       <div>
                         <div class="team-name">${esc(team.name || 'Unnamed Team')}</div>
-                        <div class="team-idea">Always-expanded member list for quick scanning</div>
+                        <div class="team-idea">${team.members.length} members</div>
                       </div>
                     </div>
                     <div class="team-meta">
@@ -83,7 +83,7 @@ function renderTeams(data) {
                         <span class="meta-label">Members</span>
                       </div>
                       <div class="meta-item">
-                        <span class="meta-value">${new Date(team.formed_at).toLocaleDateString()}</span>
+                        <span class="meta-value">${team.formed_at ? (!isNaN(new Date(team.formed_at).getTime()) ? new Date(team.formed_at).toLocaleDateString() : '-') : '-'}</span>
                         <span class="meta-label">Formed</span>
                       </div>
                     </div>
@@ -96,7 +96,7 @@ function renderTeams(data) {
                       .map(
                         (member) => `
                           <div class="member-row">
-                            <div class="avatar">${esc(member.name.charAt(0).toUpperCase())}</div>
+                            <div class="avatar">${esc(initials(member))}</div>
                             <div>
                               <div class="member-name">${esc(member.name)}</div>
                             </div>

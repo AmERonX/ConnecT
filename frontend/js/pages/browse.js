@@ -12,7 +12,8 @@ function esc(value) {
 }
 
 function initials(name) {
-  return (name || 'U')
+  const safeName = (name || '').trim();
+  return (safeName || 'U')
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
