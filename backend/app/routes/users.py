@@ -11,9 +11,6 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/me")
 async def get_me(auth: AuthContext = Depends(get_auth_context)):
-    async with db.service_connection() as service_conn:
-        await ensure_user_exists(service_conn, auth.user_id, auth.email)
-
     async with db.connection(auth.user_id) as conn:
         row = await fetchrow_dict(
             conn,
@@ -26,6 +23,19 @@ async def get_me(auth: AuthContext = Depends(get_auth_context)):
             auth.user_id,
         )
 
+        if not row:
+            await ensure_user_exists(conn, auth.user_id, auth.email)
+            row = await fetchrow_dict(
+                conn,
+                """
+                SELECT id, name, email, github_url, team_size_preference,
+                       working_style, has_existing_team, created_at
+                FROM users
+                WHERE id = $1
+                """,
+                auth.user_id,
+            )
+
     if not row:
         raise AppError(code="NOT_FOUND", message="User profile not found.", status_code=404)
 
@@ -35,30 +45,28 @@ async def get_me(auth: AuthContext = Depends(get_auth_context)):
 
 @router.patch("/me")
 async def patch_me(body: UserUpdateRequest, auth: AuthContext = Depends(get_auth_context)):
-    async with db.service_connection() as service_conn:
-        await ensure_user_exists(service_conn, auth.user_id, auth.email)
-
     payload = body.model_dump(exclude_none=True)
-    if not payload:
-        return await get_me(auth)
-
-    assignments = []
-    values = []
-    for index, (key, value) in enumerate(payload.items(), start=1):
-        assignments.append(f"{key} = ${index}")
-        values.append(value)
-
-    values.append(auth.user_id)
 
     async with db.connection(auth.user_id) as conn:
-        await conn.execute(
-            f"""
-            UPDATE users
-            SET {', '.join(assignments)}
-            WHERE id = ${len(values)}
-            """,
-            *values,
-        )
+        await ensure_user_exists(conn, auth.user_id, auth.email)
+
+        if payload:
+            assignments = []
+            values = []
+            for index, (key, value) in enumerate(payload.items(), start=1):
+                assignments.append(f"{key} = ${index}")
+                values.append(value)
+
+            values.append(auth.user_id)
+
+            await conn.execute(
+                f"""
+                UPDATE users
+                SET {', '.join(assignments)}
+                WHERE id = ${len(values)}
+                """,
+                *values,
+            )
 
         row = await fetchrow_dict(
             conn,
@@ -80,7 +88,7 @@ async def patch_me(body: UserUpdateRequest, auth: AuthContext = Depends(get_auth
 
 @router.delete("/me")
 async def delete_me(auth: AuthContext = Depends(get_auth_context)):
-    async with db.service_connection() as conn:
+    async with db.connection(auth.user_id) as conn:
         await conn.execute("DELETE FROM users WHERE id = $1", auth.user_id)
     return success_response(None)
 
@@ -146,5 +154,5 @@ async def delete_skill(skill_id: str, auth: AuthContext = Depends(get_auth_conte
         )
         if result == "DELETE 0":
             raise AppError(code="NOT_FOUND", message="Skill not found.", status_code=404)
-            
+
     return success_response(None)

@@ -45,7 +45,7 @@ async def _team_with_members(conn, team_id: str) -> dict:
 
 @router.post("/teams")
 async def create_team(body: TeamCreateRequest, auth: AuthContext = Depends(get_auth_context)):
-    async with db.connection(auth.user_id) as conn:
+    async with db.service_connection() as conn:
         participants = await fetch_dict(
             conn,
             """
@@ -100,6 +100,7 @@ async def create_team(body: TeamCreateRequest, auth: AuthContext = Depends(get_a
                     user_id,
                 )
 
+    async with db.connection(auth.user_id) as conn:
         team = await _team_with_members(conn, str(team_row["id"]))
 
     return success_response(team, status_code=201)

@@ -72,10 +72,8 @@ async def create_idea(body: IdeaCreateRequest, auth: AuthContext = Depends(get_a
     if not body.canonical_text.strip():
         raise AppError(code="VALIDATION_ERROR", message="canonical_text is required.", status_code=422)
 
-    async with db.service_connection() as service_conn:
-        await ensure_user_exists(service_conn, auth.user_id, auth.email)
-
     async with db.connection(auth.user_id) as conn:
+        await ensure_user_exists(conn, auth.user_id, auth.email)
         row = await fetchrow_dict(
             conn,
             """

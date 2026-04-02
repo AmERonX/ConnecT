@@ -157,12 +157,35 @@ ALTER TABLE match_feedback     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE teams              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE team_members       ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "users: read own"
+CREATE OR REPLACE FUNCTION is_team_member(team_uuid UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT EXISTS (
+        SELECT 1
+        FROM team_members tm
+        WHERE tm.team_id = team_uuid
+          AND tm.user_id = auth.uid()
+    );
+$$;
+
+CREATE POLICY "users: authenticated can read"
 ON users FOR SELECT TO authenticated
-USING (id = auth.uid());
+USING (true);
 
 CREATE POLICY "users: update own"
 ON users FOR UPDATE TO authenticated
+USING (id = auth.uid());
+
+CREATE POLICY "users: insert own"
+ON users FOR INSERT TO authenticated
+WITH CHECK (id = auth.uid());
+
+CREATE POLICY "users: delete own"
+ON users FOR DELETE TO authenticated
 USING (id = auth.uid());
 
 CREATE POLICY "ideas: read active"
@@ -228,9 +251,18 @@ CREATE POLICY "feedback: insert as self"
 ON match_feedback FOR INSERT TO authenticated
 WITH CHECK (actor_user_id = auth.uid());
 
-CREATE POLICY "feedback: read own"
+CREATE POLICY "feedback: participants can read"
 ON match_feedback FOR SELECT TO authenticated
-USING (actor_user_id = auth.uid());
+USING (
+    actor_user_id = auth.uid() OR
+    EXISTS (
+        SELECT 1
+        FROM match_participants mp
+        JOIN project_ideas pi ON pi.id = mp.idea_id
+        WHERE mp.match_id = match_feedback.match_id
+          AND pi.user_id = auth.uid()
+    )
+);
 
 CREATE POLICY "ratings: read own"
 ON peer_ratings FOR SELECT TO authenticated
@@ -245,25 +277,11 @@ WITH CHECK (rater_user_id = auth.uid());
 
 CREATE POLICY "teams: members can read"
 ON teams FOR SELECT TO authenticated
-USING (
-    EXISTS (
-        SELECT 1
-        FROM team_members tm
-        WHERE tm.team_id = teams.id
-          AND tm.user_id = auth.uid()
-    )
-);
+USING (is_team_member(teams.id));
 
 CREATE POLICY "team_members: members can read"
 ON team_members FOR SELECT TO authenticated
-USING (
-    EXISTS (
-        SELECT 1
-        FROM team_members tm
-        WHERE tm.team_id = team_members.team_id
-          AND tm.user_id = auth.uid()
-    )
-);
+USING (is_team_member(team_members.team_id));
 
 CREATE OR REPLACE FUNCTION claim_stale_ideas(batch_limit INT DEFAULT 10)
 RETURNS SETOF project_ideas
