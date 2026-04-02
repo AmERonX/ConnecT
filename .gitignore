@@ -8,6 +8,7 @@ backend/.env
 # ------ Personal planning docs (not for public repo) --------
 Plan/
 CODEX_INSTRUCTIONS.md
+future_improvement.md
 
 # ------ Python -----------------------------------------------
 backend/.venv/
