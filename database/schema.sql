@@ -220,7 +220,8 @@ USING (id = auth.uid());
 
 CREATE POLICY "users: update own"
 ON users FOR UPDATE TO authenticated
-USING (id = auth.uid());
+USING (id = auth.uid())
+WITH CHECK (id = auth.uid());
 
 CREATE POLICY "users: insert own"
 ON users FOR INSERT TO authenticated
@@ -240,7 +241,8 @@ WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "ideas: update own"
 ON project_ideas FOR UPDATE TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "skills: read own"
 ON user_skills FOR SELECT TO authenticated
@@ -252,7 +254,8 @@ WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "skills: update own"
 ON user_skills FOR UPDATE TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "skills: delete own"
 ON user_skills FOR DELETE TO authenticated
@@ -268,7 +271,8 @@ WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "past_projects: update own"
 ON past_projects FOR UPDATE TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "past_projects: delete own"
 ON past_projects FOR DELETE TO authenticated

@@ -69,7 +69,8 @@ WITH CHECK (id = auth.uid());
 DROP POLICY IF EXISTS "users: update own" ON users;
 CREATE POLICY "users: update own"
 ON users FOR UPDATE TO authenticated
-USING (id = auth.uid());
+USING (id = auth.uid())
+WITH CHECK (id = auth.uid());
 
 DROP POLICY IF EXISTS "users: delete own" ON users;
 CREATE POLICY "users: delete own"
@@ -80,6 +81,22 @@ DROP POLICY IF EXISTS "skills: read own" ON user_skills;
 DROP POLICY IF EXISTS "skills: read any" ON user_skills;
 CREATE POLICY "skills: read own"
 ON user_skills FOR SELECT TO authenticated
+USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "skills: insert own" ON user_skills;
+CREATE POLICY "skills: insert own"
+ON user_skills FOR INSERT TO authenticated
+WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "skills: update own" ON user_skills;
+CREATE POLICY "skills: update own"
+ON user_skills FOR UPDATE TO authenticated
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "skills: delete own" ON user_skills;
+CREATE POLICY "skills: delete own"
+ON user_skills FOR DELETE TO authenticated
 USING (user_id = auth.uid());
 
 DROP POLICY IF EXISTS "past_projects: read own" ON past_projects;
@@ -97,7 +114,8 @@ WITH CHECK (user_id = auth.uid());
 DROP POLICY IF EXISTS "past_projects: update own" ON past_projects;
 CREATE POLICY "past_projects: update own"
 ON past_projects FOR UPDATE TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
 DROP POLICY IF EXISTS "past_projects: delete own" ON past_projects;
 CREATE POLICY "past_projects: delete own"
