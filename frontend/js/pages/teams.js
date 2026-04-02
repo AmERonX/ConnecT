@@ -1,24 +1,7 @@
 import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
-
-function esc(value) {
-  return String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-function initials(name) {
-  return (name || 'U')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('');
-}
+import { esc, initials, showPageError, clearPageError } from '../utils.js';
 
 const session = await requireAuth();
 bindSidebar();
@@ -30,23 +13,6 @@ if (avatar) {
 }
 
 const container = document.querySelector('.teams-grid');
-const mainContent = document.querySelector('.main-content');
-
-function showPageError(message) {
-  const safe = esc(message || 'Unknown error');
-  let alertEl = document.getElementById('teams-page-error');
-  if (!alertEl) {
-    alertEl = document.createElement('div');
-    alertEl.id = 'teams-page-error';
-    alertEl.className = 'alert alert-error';
-    mainContent?.prepend(alertEl);
-  }
-  alertEl.innerHTML = `<span>!</span><span>${safe}</span>`;
-}
-
-function clearPageError() {
-  document.getElementById('teams-page-error')?.remove();
-}
 
 async function acceptRequest(matchId) {
   await apiFetch('/feedback', { method: 'POST', body: { match_id: matchId, signal: 'connection_accepted' } });
@@ -169,6 +135,9 @@ function renderTeams(data) {
       clearPageError();
       try {
         await acceptRequest(button.dataset.matchId);
+        const card = button.closest('article');
+        if (card) card.remove();
+        // Since a new team was created, refresh the page content to see it at the top
         await load();
       } catch (error) {
         button.removeAttribute('disabled');
@@ -183,7 +152,8 @@ function renderTeams(data) {
       clearPageError();
       try {
         await declineRequest(button.dataset.matchId);
-        await load();
+        const card = button.closest('article');
+        if (card) card.remove();
       } catch (error) {
         button.removeAttribute('disabled');
         showPageError(error.message || 'Failed to decline request.');

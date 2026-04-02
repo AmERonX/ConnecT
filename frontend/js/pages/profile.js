@@ -1,6 +1,7 @@
 import { requireAuth, logout } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
+import { esc, initials } from '../utils.js';
 
 await requireAuth();
 bindSidebar();
@@ -15,15 +16,6 @@ const topbarSubtitle = document.querySelector('.topbar-left .muted');
 let activeDialog = null;
 let previousFocusedElement = null;
 let currentProfile = null;
-
-function esc(value) {
-  return String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
 
 function safeHttpUrl(value) {
   if (!value) {
@@ -40,15 +32,6 @@ function safeHttpUrl(value) {
   }
 
   return null;
-}
-
-function initials(name) {
-  return (name || 'U')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('');
 }
 
 function setProfileField(selector, value) {

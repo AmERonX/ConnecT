@@ -1,25 +1,7 @@
 import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
-
-function esc(value) {
-  return String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-function initials(name) {
-  const safeName = (name || '').trim();
-  return (safeName || 'U')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('');
-}
+import { esc, initials, showPageError, clearPageError } from '../utils.js';
 
 function freshnessChip(item) {
   if (item.is_stale) {
@@ -42,7 +24,6 @@ const sortFilter = document.getElementById('sort-filter');
 const grid = document.querySelector('.match-grid');
 const countEl = document.querySelector('.results-count');
 const loadMoreBtn = document.getElementById('load-more-btn');
-const mainContent = document.querySelector('.main-content');
 
 const state = {
   ideas: [],
@@ -51,22 +32,6 @@ const state = {
   cursors: new Map(),
   buckets: new Map(),
 };
-
-function showPageError(message) {
-  const safe = esc(message || 'Unknown error');
-  let alertEl = document.getElementById('browse-page-error');
-  if (!alertEl) {
-    alertEl = document.createElement('div');
-    alertEl.id = 'browse-page-error';
-    alertEl.className = 'alert alert-error';
-    mainContent?.prepend(alertEl);
-  }
-  alertEl.innerHTML = `<span>!</span><span>${safe}</span>`;
-}
-
-function clearPageError() {
-  document.getElementById('browse-page-error')?.remove();
-}
 
 function render(items) {
   countEl.innerHTML = `Showing <strong>${items.length}</strong> matches`;

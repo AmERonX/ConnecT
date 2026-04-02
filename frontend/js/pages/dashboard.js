@@ -1,15 +1,7 @@
 import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
-
-function initials(name) {
-  return (name || 'U')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('');
-}
+import { esc, initials } from '../utils.js';
 
 function eventLabel(event) {
   if (event.signal === 'connection_sent') return 'Connection request sent';
@@ -80,15 +72,10 @@ try {
 } catch (error) {
   const activityList = document.querySelector('.activity-list');
   if (activityList) {
-    const message = (error.message || 'Unknown error')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-
     activityList.innerHTML = `
       <div class="activity-item slide-up">
         <div class="activity-dot activity-dot-danger"></div>
-        <span>Failed to load dashboard data: ${message}</span>
+        <span>Failed to load dashboard data: ${esc(error.message || 'Unknown error')}</span>
       </div>
     `;
   }
