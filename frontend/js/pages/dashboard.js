@@ -38,7 +38,7 @@ try {
     apiFetch('/teams'),
   ]);
 
-  const statValues = document.querySelectorAll('.stat-value');
+  const statValues = document.querySelectorAll('.num-value');
   if (statValues[0]) statValues[0].textContent = String(ideas?.length || 0);
   if (statValues[1]) {
     const sentCount = (feedback?.recent || []).filter((item) => item.signal === 'connection_sent').length;

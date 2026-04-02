@@ -225,6 +225,23 @@
     .verify-float p { font-size: 0.85rem; color: #a1a1aa; margin-bottom: 12px; line-height: 1.4; }
     .verify-float a { color: var(--primary); font-size: 0.85rem; font-weight: 600; }
 
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+    }
+    .activity-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--primary);
+    }
+    .activity-dot-danger { background: var(--danger); }
+    .activity-time {
+      margin-left: auto;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -273,8 +290,8 @@
       <header class="topbar-simple">
         <div class="top-user">
           <svg width="20" height="20" style="color: var(--text-muted); margin-right: 12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-          <div class="avatar" id="user-initial">R</div>
-          <span style="font-weight: 500; font-size: 0.95rem;">Ron</span>
+          <div class="avatar is-loading" id="user-initial">..</div>
+          <span id="user-name" class="welcome-title" style="font-weight: 500; font-size: 0.95rem;">Loading</span>
         </div>
       </header>
 
@@ -282,7 +299,7 @@
         
         <div class="banner-welcome">
           <div>
-            <h1>Welcome back, Ron! 👋</h1>
+            <h1 class="welcome-title">Welcome back! 👋</h1>
             <p>Please complete your profile to unlock all features</p>
           </div>
           <div class="banner-icon">
@@ -359,29 +376,18 @@
           </div>
         </div>
 
+        <div class="qa-section" style="margin-top: 40px;">
+          <h2>Recent Activity</h2>
+          <div class="activity-list" style="display: flex; flex-direction: column; gap: 12px; max-width: 600px;">
+            <!-- JS dynamically injects activity items here -->
+          </div>
+        </div>
+
       </main>
     </div>
   </div>
 
-  <!-- Keep scripts to fetch real user name dynamically -->
   <script src="js/config.js"></script>
-  <script type="module">
-    import { apiFetch } from './js/api.js';
-    import { initials } from './js/utils.js';
-    
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const user = await apiFetch('/users/me');
-        if (user && user.full_name) {
-          const first = user.full_name.split(' ')[0];
-          document.querySelector('h1').innerHTML = `Welcome back, ${first}! 👋`;
-          document.querySelector('span[style="font-weight: 500; font-size: 0.95rem;"]').innerText = first;
-          document.getElementById('user-initial').innerText = initials(user.full_name);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    });
-  </script>
+  <script type="module" src="js/pages/dashboard.js"></script>
 </body>
 </html>

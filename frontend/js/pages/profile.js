@@ -233,7 +233,7 @@ async function loadProfile() {
   setProfileField('.profile-email', user.email);
   setAvatarText('.profile-avatar-lg', initials(user.name));
 
-  const stats = document.querySelectorAll('.p-stat-val');
+  const stats = document.querySelectorAll('.stat-val');
   if (stats[0]) stats[0].textContent = String((teams.teams || []).length);
   if (stats[1]) stats[1].textContent = String((ideas || []).length);
   if (stats[2]) stats[2].textContent = String((skills || []).length);

@@ -10,9 +10,11 @@
       background: #0a0a0a;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
       min-height: 100vh;
       color: #fafafa;
+      padding-right: 8vw;
+      margin: 0;
     }
     
     .auth-card {
@@ -21,7 +23,7 @@
       border-radius: 24px;
       padding: 40px;
       width: 100%;
-      max-width: 440px;
+      max-width: 420px;
       box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
     }
 
@@ -80,6 +82,7 @@
       width: 18px;
       height: 18px;
       color: var(--text-muted);
+      pointer-events: none;
     }
 
     .auth-input {
@@ -179,7 +182,7 @@
     </div>
 
     <form id="signup-form">
-      <div id="auth-error" class="alert alert-error" style="display: none; color: var(--danger); font-size: 0.85rem; margin-bottom: 12px;">
+      <div id="auth-error" class="alert alert-error" style="color: var(--danger); font-size: 0.85rem; margin-bottom: 12px;" hidden>
         <span id="error-text"></span>
       </div>
 
