@@ -82,7 +82,7 @@ try {
     activityList.innerHTML = `
       <div class="activity-item slide-up">
         <div class="activity-dot" style="background:var(--red)"></div>
-        <span>Failed to load dashboard data: ${error.message || 'Unknown error'}</span>
+        <span>Failed to load dashboard data: ${(error.message || 'Unknown error').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
       </div>
     `;
   }

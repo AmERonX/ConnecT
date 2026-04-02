@@ -1,4 +1,4 @@
-import { requireAuth } from '../auth.js';
+import { requireAuth, logout } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
 
@@ -6,6 +6,7 @@ await requireAuth();
 bindSidebar();
 
 const editBtn = document.getElementById('edit-btn');
+const deleteBtn = document.getElementById('delete-account-btn');
 
 function esc(value) {
   return String(value || '')
@@ -55,10 +56,24 @@ async function loadProfile() {
       ? skills
           .map(
             (skill) =>
-              `<span class="skill-tag">${esc(skill.skill_name)}${skill.level ? ` (${esc(skill.level)})` : ''}</span>`,
+              `<span class="skill-tag" style="cursor:pointer" title="Click to remove" data-skill-id="${skill.id}">
+                 ${esc(skill.skill_name)}${skill.level ? ` (${esc(skill.level)})` : ''} <span style="opacity:0.5;margin-left:4px">×</span>
+               </span>`,
           )
           .join('')
       : '<span style="color:var(--text-secondary);font-size:0.875rem">No skills added yet.</span>';
+
+    for (const tag of skillsGrid.querySelectorAll('.skill-tag')) {
+      tag.addEventListener('click', async () => {
+        if (!confirm('Remove this skill?')) return;
+        try {
+          await apiFetch(`/users/me/skills/${tag.dataset.skillId}`, { method: 'DELETE' });
+          await loadProfile();
+        } catch (error) {
+          alert('Failed to delete skill: ' + (error.message || 'Unknown error'));
+        }
+      });
+    }
   }
 
   const githubRow = document.querySelector('#links-section .social-value');
@@ -84,6 +99,8 @@ async function loadProfile() {
 
 let currentProfile = null;
 
+const VALID_STYLES = ['async', 'sync', 'flexible'];
+
 async function editProfile() {
   if (!currentProfile) return;
 
@@ -93,13 +110,18 @@ async function editProfile() {
   const teamSize = teamSizeInput ? Number(teamSizeInput) || null : null;
   const workingStyle = prompt('Working style (async, sync, flexible)', currentProfile.working_style || '') || null;
 
+  if (workingStyle && !VALID_STYLES.includes(workingStyle.toLowerCase())) {
+    alert('Working style must be one of: async, sync, flexible');
+    return;
+  }
+
   await apiFetch('/users/me', {
     method: 'PATCH',
     body: {
       name,
       github_url: github,
       team_size_preference: teamSize,
-      working_style: workingStyle || null,
+      working_style: workingStyle ? workingStyle.toLowerCase() : null,
     },
   });
 
@@ -114,6 +136,39 @@ editBtn?.addEventListener('click', async () => {
   }
 });
 
+deleteBtn?.addEventListener('click', async () => {
+  if (!confirm('Are you sure you want to permanently delete your account? This cannot be undone.')) return;
+  try {
+    await apiFetch('/users/me', { method: 'DELETE' });
+    await logout();
+  } catch (error) {
+    alert(error.message || 'Failed to delete account.');
+  }
+});
+
+document.getElementById('add-skill-btn')?.addEventListener('click', async () => {
+  const skillName = prompt('Skill name (e.g. Python, React)');
+  if (!skillName?.trim()) return;
+
+  let level = prompt('Skill level (beginner, intermediate, advanced) - Optional') || null;
+  const validLevels = ['beginner', 'intermediate', 'advanced'];
+  
+  if (level && !validLevels.includes(level.toLowerCase())) {
+    alert('Invalid skill level. Must be beginner, intermediate, or advanced.');
+    return;
+  }
+
+  try {
+    await apiFetch('/users/me/skills', {
+      method: 'POST',
+      body: { skill_name: skillName.trim(), level: level ? level.toLowerCase() : null }
+    });
+    await loadProfile();
+  } catch (error) {
+    alert(error.message || 'Failed to add skill.');
+  }
+});
+
 try {
   currentProfile = await loadProfile();
 } catch (error) {
@@ -122,3 +177,4 @@ try {
     skillsSection.innerHTML = `<div class="alert alert-error"><span>!</span><span>${esc(error.message || 'Failed to load profile')}</span></div>`;
   }
 }
+

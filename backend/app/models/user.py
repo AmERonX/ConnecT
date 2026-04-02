@@ -23,3 +23,9 @@ class UserUpdateRequest(BaseModel):
     team_size_preference: Optional[int] = None
     working_style: Optional[WorkingStyle] = None
     has_existing_team: Optional[bool] = None
+
+SkillLevel = Literal["beginner", "intermediate", "advanced"]
+
+class UserSkillCreateRequest(BaseModel):
+    skill_name: str
+    level: Optional[SkillLevel] = None

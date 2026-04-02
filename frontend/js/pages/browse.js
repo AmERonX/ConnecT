@@ -66,7 +66,7 @@ function render(items) {
           </div>
           <div style="display:flex;gap:6px">
             <button class="btn btn-primary btn-sm" data-action="connect" data-match-id="${item.match_id}">Connect</button>
-            <a class="btn btn-ghost btn-sm" href="profile.html">View</a>
+            <a class="btn btn-ghost btn-sm" href="#" title="Coming soon" style="opacity:0.5;cursor:not-allowed" onclick="event.preventDefault()">View</a>
           </div>
         </div>
       </div>

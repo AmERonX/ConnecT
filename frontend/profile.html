@@ -175,10 +175,10 @@
 
       <!-- Profile banner -->
       <div class="profile-banner fade-in">
-        <div class="profile-avatar-lg">R</div>
+        <div class="profile-avatar-lg">…</div>
         <div>
-          <div class="profile-name">Ron</div>
-          <div class="profile-email">cosmic.wron@gmail.com</div>
+          <div class="profile-name">Loading…</div>
+          <div class="profile-email">—</div>
           <div style="margin-top:8px">
             <span class="badge" style="background:rgba(108,99,255,0.12);color:var(--primary)">Student Builder</span>
           </div>
@@ -188,64 +188,56 @@
       <!-- Stats -->
       <div class="profile-stats stagger">
         <div class="profile-stat slide-up">
-          <div class="p-stat-val">1</div>
+          <div class="p-stat-val">—</div>
           <div class="p-stat-label">Teams</div>
         </div>
         <div class="profile-stat slide-up">
-          <div class="p-stat-val">3</div>
+          <div class="p-stat-val">—</div>
           <div class="p-stat-label">Ideas</div>
         </div>
         <div class="profile-stat slide-up">
-          <div class="p-stat-val">5</div>
+          <div class="p-stat-val">—</div>
           <div class="p-stat-label">Skills</div>
         </div>
       </div>
 
       <!-- Skills -->
-      <div class="profile-section">
+      <div class="profile-section" id="skills-section">
         <div class="ps-header">
           <div class="ps-title">🏷️ Skills & Technologies</div>
+          <button class="btn btn-ghost btn-sm" id="add-skill-btn">+ Add</button>
         </div>
         <div class="skills-grid">
-          <span class="skill-tag">Python</span>
-          <span class="skill-tag">Machine Learning</span>
-          <span class="skill-tag">NLP</span>
-          <span class="skill-tag">FastAPI</span>
-          <span class="skill-tag">PostgreSQL</span>
         </div>
       </div>
 
       <!-- Social links -->
-      <div class="profile-section">
+      <div class="profile-section" id="links-section">
         <div class="ps-header">
           <div class="ps-title">🔗 Social Links</div>
         </div>
         <div class="social-row">
           <span class="social-label">GitHub</span>
-          <span class="social-value"><a href="#">github.com/ron-dev</a></span>
-        </div>
-        <div class="social-row">
-          <span class="social-label">LinkedIn</span>
-          <span class="social-value" style="color:var(--text-muted);font-style:italic">Not added</span>
+          <span class="social-value">—</span>
         </div>
       </div>
 
       <!-- Working Preferences -->
-      <div class="profile-section">
+      <div class="profile-section" id="preferences-section">
         <div class="ps-header">
           <div class="ps-title">⚙️ Working Preferences</div>
         </div>
         <div class="social-row">
           <span class="social-label">Team size</span>
-          <span class="social-value">2 – 4 people</span>
+          <span class="social-value">—</span>
         </div>
         <div class="social-row">
           <span class="social-label">Working style</span>
-          <span class="social-value">Flexible</span>
+          <span class="social-value">—</span>
         </div>
         <div class="social-row">
           <span class="social-label">Existing team</span>
-          <span class="social-value">No</span>
+          <span class="social-value">—</span>
         </div>
       </div>
 
@@ -257,7 +249,7 @@
         <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:14px">
           Permanently delete your account, teams, and ideas. This cannot be undone.
         </p>
-        <button class="btn btn-danger btn-sm">Delete Account</button>
+        <button class="btn btn-danger btn-sm" id="delete-account-btn">Delete Account</button>
       </div>
 
     </main>
