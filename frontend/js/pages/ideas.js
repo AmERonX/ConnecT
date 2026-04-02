@@ -46,29 +46,32 @@ try {
     ideas
       .map(
         (idea) => `
-      <div class="idea-card slide-up" data-idea-id="${idea.id}">
-        <div class="idea-card-header">
-          <h3 class="idea-card-problem">${esc(idea.problem)}</h3>
-          ${freshnessBadge(idea.freshness)}
-        </div>
-        <p class="idea-card-approach">${esc(idea.approach || idea.solution_idea || 'No approach added yet.')}</p>
-        <div class="idea-card-footer">
-          <div style="display:flex;gap:5px;flex-wrap:wrap">
-            ${(idea.tags || []).map((tag) => `<span class="tag-chip">${esc(tag)}</span>`).join('')}
-          </div>
-          <div class="idea-matches">${countMap.get(idea.id) || 0} matches</div>
-        </div>
-      </div>
-    `,
+          <article class="idea-card slide-up" data-idea-id="${idea.id}">
+            <div class="idea-card-header">
+              <div>
+                <h3 class="idea-card-problem">${esc(idea.problem)}</h3>
+                <p class="match-meta">${idea.solution_idea ? esc(idea.solution_idea) : 'No solution summary added yet.'}</p>
+              </div>
+              ${freshnessBadge(idea.freshness)}
+            </div>
+            <p class="idea-card-approach">${esc(idea.approach || idea.solution_idea || 'No approach added yet.')}</p>
+            <div class="idea-card-footer">
+              <div class="match-tags">
+                ${(idea.tags || []).map((tag) => `<span class="tag-chip">${esc(tag)}</span>`).join('') || '<span class="tag-chip">Untagged</span>'}
+              </div>
+              <div class="idea-matches">${countMap.get(idea.id) || 0} matches</div>
+            </div>
+          </article>
+        `,
       )
       .join('') +
     `
-    <a href="idea-editor.html" class="idea-new-card slide-up">
-      <div class="idea-new-icon">+</div>
-      <div style="font-weight:600;font-size:0.9375rem">Add New Idea</div>
-      <div style="font-size:0.8125rem;color:var(--text-secondary)">Describe a project and get matched</div>
-    </a>
-  `;
+      <a href="idea-editor.html" class="idea-new-card slide-up">
+        <div class="idea-new-icon">+</div>
+        <div class="quick-label">Add a new idea</div>
+        <div class="quick-desc">Create a fresh brief and start matching.</div>
+      </a>
+    `;
 
   for (const card of grid.querySelectorAll('.idea-card')) {
     card.addEventListener('click', () => {
@@ -78,11 +81,11 @@ try {
   }
 } catch (error) {
   grid.innerHTML = `
-    <div class="empty-state" style="grid-column:1 / -1">
+    <div class="empty-state">
       <div class="empty-icon">!</div>
       <div class="empty-title">Unable to load ideas</div>
       <div class="empty-text">${esc(error.message || 'Unknown error')}</div>
-      <a href="idea-editor.html" class="btn btn-primary btn-sm">Create Idea</a>
+      <a href="idea-editor.html" class="btn btn-primary btn-sm">Create idea</a>
     </div>
   `;
 }

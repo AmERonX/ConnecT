@@ -3,644 +3,244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ConnecT — Find Your Perfect Teammate</title>
-  <meta name="description" content="AI-powered teammate matching for student builders. Describe your project, get matched with people who complement your skills.">
+  <title>ConnecT - Build Better Teams</title>
+  <meta name="description" content="ConnecT helps students find collaborators around shared ideas, compatible skills, and realistic commitments.">
   <link rel="stylesheet" href="styles/main.css">
-  <style>
-    /* ── HERO ──────────────────────────────────────────── */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-      padding: 120px 0 80px;
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108,99,255,0.18) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 40% at 80% 60%, rgba(0,212,255,0.08) 0%, transparent 60%);
-    }
-
-    .hero-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 64px 64px;
-      mask-image: radial-gradient(ellipse 80% 80% at 50% 20%, black 40%, transparent 100%);
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      max-width: 760px;
-      margin: 0 auto;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: rgba(108, 99, 255, 0.12);
-      border: 1px solid rgba(108, 99, 255, 0.25);
-      border-radius: var(--radius-full);
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #a78bfa;
-      margin-bottom: 28px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .hero-badge-dot {
-      width: 6px; height: 6px;
-      background: var(--primary);
-      border-radius: 50%;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .hero-title {
-      font-size: clamp(2.5rem, 6vw, 4rem);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      margin-bottom: 20px;
-    }
-
-    .hero-title .line-2 {
-      background: var(--grad-text);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-subtitle {
-      font-size: 1.125rem;
-      color: var(--text-secondary);
-      line-height: 1.7;
-      max-width: 540px;
-      margin: 0 auto 40px;
-    }
-
-    .hero-actions {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .hero-social-proof {
-      margin-top: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-
-    .proof-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-
-    .proof-icon {
-      width: 20px; height: 20px;
-      color: var(--primary);
-      flex-shrink: 0;
-    }
-
-    .proof-divider {
-      width: 1px; height: 20px;
-      background: var(--border);
-    }
-
-    /* ── HOW IT WORKS ─────────────────────────────────── */
-    .steps-section {
-      padding: 96px 0;
-      position: relative;
-    }
-
-    .section-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--primary);
-      margin-bottom: 12px;
-    }
-
-    .section-title {
-      font-size: clamp(1.75rem, 4vw, 2.5rem);
-      font-weight: 800;
-      letter-spacing: -0.025em;
-      margin-bottom: 16px;
-    }
-
-    .section-subtitle {
-      font-size: 1rem;
-      color: var(--text-secondary);
-      max-width: 480px;
-      margin: 0 auto;
-      line-height: 1.7;
-    }
-
-    .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-top: 56px;
-      position: relative;
-    }
-
-    /* connecting line */
-    .steps-grid::before {
-      content: '';
-      position: absolute;
-      top: 32px;
-      left: calc(16.66% + 10px);
-      right: calc(16.66% + 10px);
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
-      opacity: 0.4;
-    }
-
-    .step-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px 24px;
-      position: relative;
-      transition: border-color var(--t-normal), transform var(--t-normal), box-shadow var(--t-normal);
-    }
-
-    .step-card:hover {
-      border-color: rgba(108,99,255,0.35);
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md), 0 0 30px rgba(108,99,255,0.1);
-    }
-
-    .step-number {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 42px; height: 42px;
-      border-radius: 50%;
-      background: var(--grad-primary);
-      font-size: 0.875rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(108,99,255,0.4);
-      position: relative;
-      z-index: 1;
-    }
-
-    .step-title {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .step-description {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-      line-height: 1.65;
-    }
-
-    /* ── FEATURES ─────────────────────────────────────── */
-    .features-section {
-      padding: 96px 0;
-      background: linear-gradient(180deg, transparent 0%, rgba(108,99,255,0.03) 50%, transparent 100%);
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-top: 56px;
-    }
-
-    .feature-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      display: flex;
-      gap: 20px;
-      transition: border-color var(--t-normal), background var(--t-normal);
-    }
-
-    .feature-card:hover {
-      border-color: rgba(108,99,255,0.25);
-      background: var(--bg-card-hover);
-    }
-
-    .feature-icon {
-      width: 44px; height: 44px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      flex-shrink: 0;
-    }
-
-    .feature-icon-purple { background: rgba(108,99,255,0.15); }
-    .feature-icon-cyan   { background: rgba(0,212,255,0.1); }
-    .feature-icon-green  { background: rgba(16,185,129,0.12); }
-    .feature-icon-yellow { background: rgba(245,158,11,0.12); }
-
-    .feature-title {
-      font-size: 0.9375rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .feature-description {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-
-    /* ── CTA SECTION ──────────────────────────────────── */
-    .cta-section {
-      padding: 96px 0;
-    }
-
-    .cta-card {
-      background: var(--grad-card);
-      border: 1px solid rgba(108,99,255,0.2);
-      border-radius: var(--radius-xl);
-      padding: 72px 48px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cta-card::before {
-      content: '';
-      position: absolute;
-      top: -60px; left: 50%;
-      transform: translateX(-50%);
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(108,99,255,0.2) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .cta-title {
-      font-size: clamp(1.75rem, 4vw, 2.5rem);
-      font-weight: 800;
-      letter-spacing: -0.025em;
-      margin-bottom: 14px;
-    }
-
-    .cta-subtitle {
-      font-size: 1rem;
-      color: var(--text-secondary);
-      margin-bottom: 36px;
-    }
-
-    /* ── FOOTER ───────────────────────────────────────── */
-    .footer {
-      border-top: 1px solid var(--border);
-      padding: 32px 0;
-    }
-
-    .footer-content {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .footer-text {
-      font-size: 0.8125rem;
-      color: var(--text-muted);
-    }
-
-    /* ── MOCK MATCH CARD (hero visual) ────────────────── */
-    .hero-visual {
-      position: relative;
-      margin-top: 64px;
-    }
-
-    .mock-card {
-      background: var(--bg-card);
-      border: 1px solid rgba(108,99,255,0.2);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      max-width: 520px;
-      margin: 0 auto;
-      box-shadow: var(--shadow-lg), 0 0 40px rgba(108,99,255,0.12);
-    }
-
-    .mock-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-
-    .mock-user {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .mock-score {
-      font-size: 1.5rem;
-      font-weight: 800;
-      background: var(--grad-text);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .mock-idea-title {
-      font-weight: 600;
-      font-size: 0.9375rem;
-      margin-bottom: 6px;
-    }
-
-    .mock-idea-text {
-      font-size: 0.8125rem;
-      color: var(--text-secondary);
-      line-height: 1.6;
-      margin-bottom: 14px;
-    }
-
-    .mock-tags {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .mock-tag {
-      padding: 3px 10px;
-      background: rgba(108,99,255,0.12);
-      color: #a78bfa;
-      border-radius: var(--radius-full);
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    @media (max-width: 768px) {
-      .steps-grid { grid-template-columns: 1fr; }
-      .steps-grid::before { display: none; }
-      .features-grid { grid-template-columns: 1fr; }
-      .cta-card { padding: 48px 24px; }
-      .footer-content { flex-direction: column; gap: 12px; text-align: center; }
-    }
-  </style>
 </head>
 <body>
-
-<!-- ── NAVBAR ──── -->
-<nav class="navbar" id="navbar">
-  <div class="container">
-    <a href="index.html" class="nav-logo">ConnecT</a>
-    <div class="nav-actions">
-      <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
-      <a href="signup.html" class="btn btn-primary btn-sm">Get started</a>
-    </div>
-  </div>
-</nav>
-
-<!-- ── HERO ──── -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
-
-  <div class="container">
-    <div class="hero-content slide-up">
-
-      <div class="hero-badge">
-        <span class="hero-badge-dot"></span>
-        AI-powered teammate matching
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand" aria-label="ConnecT home">
+        <span class="brand-mark">C</span>
+        <span class="nav-logo">ConnecT</span>
+      </a>
+      <div class="nav-links">
+        <a href="#why" class="nav-link">Why ConnecT</a>
+        <a href="#system" class="nav-link">Design System</a>
+        <a href="#flow" class="nav-link">How It Works</a>
       </div>
-
-      <h1 class="hero-title">
-        Build with people who<br>
-        <span class="line-2">complement your vision</span>
-      </h1>
-
-      <p class="hero-subtitle">
-        Describe your project idea. Our AI finds the gaps, finds the people,
-        and connects you with teammates who bring exactly what you're missing.
-      </p>
-
-      <div class="hero-actions">
-        <a href="signup.html" class="btn btn-primary btn-xl">Start for free</a>
-        <a href="#how-it-works" class="btn btn-ghost btn-xl">See how it works</a>
-      </div>
-
-      <div class="hero-social-proof">
-        <div class="proof-item">
-          <svg class="proof-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-          </svg>
-          Idea-level matching
-        </div>
-        <div class="proof-divider"></div>
-        <div class="proof-item">
-          <svg class="proof-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Cohere AI powered
-        </div>
-        <div class="proof-divider"></div>
-        <div class="proof-item">
-          <svg class="proof-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          Your data stays yours
-        </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+        <a href="signup.html" class="btn btn-primary btn-sm">Create account</a>
       </div>
     </div>
+  </nav>
 
-    <!-- Mock match card -->
-    <div class="hero-visual fade-in">
-      <div class="mock-card">
-        <div class="mock-header">
-          <div class="mock-user">
-            <div class="avatar" style="background: linear-gradient(135deg,#f093fb,#f5576c)">A</div>
-            <div>
-              <div style="font-weight:600;font-size:0.875rem">Aanya Mehta</div>
-              <div style="font-size:0.75rem;color:var(--text-secondary)">10h / week</div>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-shell">
+          <div class="hero-copy">
+            <span class="eyebrow">
+              <span class="eyebrow-dot"></span>
+              Student collaboration, not profile scrolling
+            </span>
+            <h1 class="hero-title">Find the <span class="text-gradient">right people</span> for the work you actually want to build.</h1>
+            <p class="hero-subtitle">
+              ConnecT matches students around concrete ideas, shared pace, and complementary strengths. Describe the problem, get an AI-normalized summary, and connect with builders who close the gaps in your team.
+            </p>
+            <div class="hero-actions">
+              <a href="signup.html" class="btn btn-primary btn-xl">Start building</a>
+              <a href="#flow" class="btn btn-ghost btn-xl">See the flow</a>
+            </div>
+            <div class="hero-metrics">
+              <div class="hero-metric">
+                <span class="hero-metric-value">Idea first</span>
+                <span>Matching begins with the problem, not vanity signals.</span>
+              </div>
+              <div class="hero-metric">
+                <span class="hero-metric-value">Human approval</span>
+                <span>Nothing is stored until the canonical summary looks right to you.</span>
+              </div>
+              <div class="hero-metric">
+                <span class="hero-metric-value">Real constraints</span>
+                <span>Hours per week, duration, skills, and momentum stay visible.</span>
+              </div>
             </div>
           </div>
+
+          <div class="hero-panel fade-in">
+            <div class="hero-preview">
+              <span class="preview-label">Live matching preview</span>
+              <div class="preview-head">
+                <div>
+                  <p class="muted">Suggested collaborator</p>
+                  <h2>Adaptive learning team</h2>
+                </div>
+                <div class="preview-score">
+                  <span class="muted">Match</span>
+                  <strong class="text-gradient">91%</strong>
+                </div>
+              </div>
+              <div class="preview-card">
+                <div class="preview-meta">
+                  <span class="avatar">AM</span>
+                  <div>
+                    <div class="preview-name">Aanya Mehta</div>
+                    <div class="preview-role">NLP + product systems · 10 hours/week</div>
+                  </div>
+                </div>
+                <p class="preview-summary">
+                  Building an adaptive study partner platform that pairs students by complementary weak areas, course overlap, and learning style signals.
+                </p>
+                <div class="match-tags">
+                  <span class="tag-chip">Education</span>
+                  <span class="tag-chip">NLP</span>
+                  <span class="tag-chip">Matching</span>
+                  <span class="tag-chip">Python</span>
+                </div>
+                <div class="preview-actions">
+                  <a href="signup.html" class="btn btn-primary btn-sm">Connect</a>
+                  <a href="browse.html" class="btn btn-ghost btn-sm">Browse more</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-section" id="why">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-copy">
+            <span class="eyebrow">Product direction</span>
+            <h2 class="section-title">A calmer, sharper collaboration experience.</h2>
+            <p class="section-subtitle">
+              The redesign treats ConnecT as a focused product for student builders: editorial spacing, neutral surfaces, one strong accent, and layouts that privilege decisions over decoration.
+            </p>
+          </div>
+        </div>
+        <div class="feature-grid stagger">
+          <article class="feature-card slide-up">
+            <div class="feature-icon">01</div>
+            <h3>Idea-led onboarding</h3>
+            <p>The first meaningful action is describing the project clearly, so the product immediately understands intent and direction.</p>
+          </article>
+          <article class="feature-card slide-up">
+            <div class="feature-icon">02</div>
+            <h3>Readable information hierarchy</h3>
+            <p>Large headings, generous spacing, and quiet surfaces keep dense collaboration data easy to scan on every screen size.</p>
+          </article>
+          <article class="feature-card slide-up">
+            <div class="feature-icon">03</div>
+            <h3>Fewer bright signals, better emphasis</h3>
+            <p>Muted neutrals and a restrained teal-blue accent make states feel premium and intentional instead of noisy.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-section" id="system">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-copy">
+            <span class="eyebrow">Design system first</span>
+            <h2 class="section-title">One system across public, auth, and app surfaces.</h2>
+            <p class="section-subtitle">
+              Colors, type, spacing, radii, shadows, and interaction states now behave consistently across every page in the frontend.
+            </p>
+          </div>
+        </div>
+        <div class="system-grid stagger">
+          <article class="system-card slide-up">
+            <h3>Palette</h3>
+            <ul>
+              <li><span>Primary</span><span class="text-accent">Teal slate</span></li>
+              <li><span>Accent</span><span>Muted cobalt</span></li>
+              <li><span>Background</span><span>Warm ivory</span></li>
+              <li><span>Text</span><span>Deep ink</span></li>
+            </ul>
+          </article>
+          <article class="system-card slide-up">
+            <h3>Type scale</h3>
+            <ul>
+              <li><span>H1</span><span>2.75rem - 5.5rem</span></li>
+              <li><span>H2</span><span>2rem - 3.5rem</span></li>
+              <li><span>Body</span><span>1rem / 1.6</span></li>
+              <li><span>Small</span><span>0.875rem</span></li>
+            </ul>
+          </article>
+          <article class="system-card slide-up">
+            <h3>Spacing</h3>
+            <ul>
+              <li><span>Base grid</span><span>8px rhythm</span></li>
+              <li><span>Section</span><span>72-96px</span></li>
+              <li><span>Card padding</span><span>20-32px</span></li>
+              <li><span>Gap scale</span><span>8-64px</span></li>
+            </ul>
+          </article>
+          <article class="system-card slide-up">
+            <h3>Components</h3>
+            <ul>
+              <li><span>Buttons</span><span>Primary, secondary, ghost</span></li>
+              <li><span>Lists</span><span>Rows and table shell</span></li>
+              <li><span>Inputs</span><span>Custom states</span></li>
+              <li><span>Modal</span><span>Shared overlay pattern</span></li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-section" id="flow">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-copy">
+            <span class="eyebrow">How it works</span>
+            <h2 class="section-title">Three steps from raw idea to active team.</h2>
+            <p class="section-subtitle">
+              The workflow is simple on purpose. Every step has one job: clarify the idea, confirm it, then move into connection and delivery.
+            </p>
+          </div>
+        </div>
+        <div class="steps-grid stagger">
+          <article class="step-card slide-up">
+            <span class="step-index">1</span>
+            <h3>Capture the idea</h3>
+            <p>Write the problem, your proposed solution, and how you expect the project to work. Tags and commitment keep the brief realistic.</p>
+          </article>
+          <article class="step-card slide-up">
+            <span class="step-index">2</span>
+            <h3>Review the AI summary</h3>
+            <p>The system extracts a canonical summary. If the idea is vague, you get targeted feedback instead of a low-quality save.</p>
+          </article>
+          <article class="step-card slide-up">
+            <span class="step-index">3</span>
+            <h3>Connect and form teams</h3>
+            <p>Browse ranked matches, send requests, accept a connection, and move directly into a team view with visible member context.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-section">
+      <div class="container">
+        <div class="cta-panel">
           <div>
-            <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:2px;text-align:right">Match score</div>
-            <div class="mock-score">91%</div>
+            <span class="eyebrow">Ready to use it</span>
+            <h2 class="section-title">Start with a project worth building.</h2>
+            <p class="section-subtitle">Create an account, describe the idea, and let the redesigned flow take you through approval, matching, and team creation.</p>
           </div>
-        </div>
-        <div class="mock-idea-title">AI Study Partner Platform</div>
-        <div class="mock-idea-text">
-          A system that pairs students based on complementary learning styles and course overlaps,
-          using adaptive quizzing to identify knowledge gaps and suggest study sessions.
-        </div>
-        <div class="mock-tags">
-          <span class="mock-tag">Education</span>
-          <span class="mock-tag">NLP</span>
-          <span class="mock-tag">Matching</span>
-          <span class="mock-tag">Python</span>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:14px">
-          <button class="btn btn-primary btn-sm w-full">Connect</button>
-          <button class="btn btn-ghost btn-sm">View profile</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── HOW IT WORKS ──── -->
-<section class="steps-section" id="how-it-works">
-  <div class="container">
-    <div class="text-center">
-      <div class="section-label">How it works</div>
-      <h2 class="section-title">From idea to team in three steps</h2>
-      <p class="section-subtitle">
-        No scrolling through profiles. Describe your project — the AI does the rest.
-      </p>
-    </div>
-
-    <div class="steps-grid stagger">
-      <div class="step-card slide-up">
-        <div class="step-number">1</div>
-        <h3 class="step-title">Describe your project</h3>
-        <p class="step-description">
-          Fill in your problem, approach, and idea. Our AI reviews it and generates a clean,
-          normalised summary — you approve it before anything is saved.
-        </p>
-      </div>
-
-      <div class="step-card slide-up">
-        <div class="step-number">2</div>
-        <h3 class="step-title">Get matched instantly</h3>
-        <p class="step-description">
-          The moment you save your idea, our embedding pipeline finds the closest matches
-          from all active projects — ranked by similarity.
-        </p>
-      </div>
-
-      <div class="step-card slide-up">
-        <div class="step-number">3</div>
-        <h3 class="step-title">Connect and build</h3>
-        <p class="step-description">
-          Browse ranked match cards, view their ideas, send a connection request.
-          If both accept, a team is formed instantly.
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── FEATURES ──── -->
-<section class="features-section" id="features">
-  <div class="container">
-    <div class="text-center">
-      <div class="section-label">Features</div>
-      <h2 class="section-title">Designed for serious builders</h2>
-      <p class="section-subtitle">
-        Every feature exists for one reason: getting the right people into the same room.
-      </p>
-    </div>
-
-    <div class="features-grid stagger">
-      <div class="feature-card slide-up">
-        <div class="feature-icon feature-icon-purple">🧠</div>
-        <div>
-          <div class="feature-title">AI canonicalization</div>
-          <div class="feature-description">
-            Your raw idea is processed by an LLM that extracts only what you actually said —
-            no hallucinations, no fluff. You review and approve the summary.
+          <div class="hero-actions">
+            <a href="signup.html" class="btn btn-primary btn-lg">Create account</a>
+            <a href="login.html" class="btn btn-ghost btn-lg">Log in</a>
           </div>
         </div>
       </div>
+    </section>
+  </main>
 
-      <div class="feature-card slide-up">
-        <div class="feature-icon feature-icon-cyan">🎯</div>
-        <div>
-          <div class="feature-title">Semantic matching</div>
-          <div class="feature-description">
-            Cohere's embedding model turns your idea into a 1024-dimension vector.
-            Matches are ranked by cosine similarity — not keywords.
-          </div>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-shell">
+        <div class="nav-brand">
+          <span class="brand-mark">C</span>
+          <span class="nav-logo">ConnecT</span>
         </div>
-      </div>
-
-      <div class="feature-card slide-up">
-        <div class="feature-icon feature-icon-green">✅</div>
-        <div>
-          <div class="feature-title">Live pipeline status</div>
-          <div class="feature-description">
-            Every idea has a freshness indicator — <em>computing, partial, fresh</em>.
-            You always know if your match list is up to date.
-          </div>
-        </div>
-      </div>
-
-      <div class="feature-card slide-up">
-        <div class="feature-icon feature-icon-yellow">🔒</div>
-        <div>
-          <div class="feature-title">Nothing stored without your approval</div>
-          <div class="feature-description">
-            The AI conversation is stateless. Your idea only hits the database
-            once you've read and approved the canonical summary.
-          </div>
-        </div>
+        <p>Student collaboration platform for finding the right teammate around the right idea.</p>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ── CTA ──── -->
-<section class="cta-section">
-  <div class="container">
-    <div class="cta-card">
-      <h2 class="cta-title">Ready to find your teammate?</h2>
-      <p class="cta-subtitle">Describe your idea in 3 minutes. Get your first matches automatically.</p>
-      <a href="signup.html" class="btn btn-primary btn-xl">Get started — it's free</a>
-    </div>
-  </div>
-</section>
-
-<!-- ── FOOTER ──── -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-content">
-      <span class="nav-logo" style="font-size:1rem">ConnecT</span>
-      <span class="footer-text">Built for student builders. Powered by Cohere.</span>
-      <div style="display:flex;gap:16px">
-        <a href="login.html" style="font-size:0.8125rem;color:var(--text-muted)">Login</a>
-        <a href="signup.html" style="font-size:0.8125rem;color:var(--text-muted)">Sign up</a>
-      </div>
-    </div>
-  </div>
-</footer>
-
-<script>
-  // Subtle nav background on scroll
-  const navbar = document.getElementById('navbar');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 20) {
-      navbar.style.background = 'rgba(8,13,24,0.95)';
-    } else {
-      navbar.style.background = 'rgba(8,13,24,0.8)';
-    }
-  });
-</script>
-
+  </footer>
 </body>
 </html>

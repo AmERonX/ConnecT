@@ -11,6 +11,13 @@ function esc(value) {
     .replaceAll("'", '&#039;');
 }
 
+function freshnessChip(item) {
+  if (item.is_stale) {
+    return '<span class="badge badge-computing"><span class="badge-dot"></span> Updating</span>';
+  }
+  return '<span class="badge badge-fresh"><span class="badge-dot"></span> Fresh</span>';
+}
+
 await requireAuth();
 bindSidebar();
 
@@ -19,6 +26,7 @@ const sortFilter = document.getElementById('sort-filter');
 const grid = document.querySelector('.match-grid');
 const countEl = document.querySelector('.results-count');
 const loadMoreBtn = document.getElementById('load-more-btn');
+const mainContent = document.querySelector('.main-content');
 
 const state = {
   ideas: [],
@@ -28,15 +36,31 @@ const state = {
   buckets: new Map(),
 };
 
+function showPageError(message) {
+  const safe = esc(message || 'Unknown error');
+  let alertEl = document.getElementById('browse-page-error');
+  if (!alertEl) {
+    alertEl = document.createElement('div');
+    alertEl.id = 'browse-page-error';
+    alertEl.className = 'alert alert-error';
+    mainContent?.prepend(alertEl);
+  }
+  alertEl.innerHTML = `<span>!</span><span>${safe}</span>`;
+}
+
+function clearPageError() {
+  document.getElementById('browse-page-error')?.remove();
+}
+
 function render(items) {
   countEl.innerHTML = `Showing <strong>${items.length}</strong> matches`;
 
   if (!items.length) {
     grid.innerHTML = `
-      <div class="empty-state" style="grid-column:1 / -1">
-        <div class="empty-icon">🔎</div>
+      <div class="empty-state">
+        <div class="empty-icon">?</div>
         <div class="empty-title">No matches yet</div>
-        <div class="empty-text">Your matches will appear once embeddings and scoring complete.</div>
+        <div class="empty-text">Your matches will appear once embeddings and scoring complete for the selected idea scope.</div>
       </div>
     `;
     return;
@@ -45,38 +69,37 @@ function render(items) {
   grid.innerHTML = items
     .map(
       (item) => `
-      <div class="match-card slide-up">
-        <div class="match-header">
-          <div class="match-user">
-            <div class="avatar">${esc((item.matched_idea.owner.name || 'U').charAt(0).toUpperCase())}</div>
+        <article class="match-card slide-up">
+          <div class="match-header">
+            <div class="match-user">
+              <div class="avatar">${esc((item.matched_idea.owner.name || 'U').charAt(0).toUpperCase())}</div>
+              <div>
+                <div class="match-name">${esc(item.matched_idea.owner.name)}</div>
+                <div class="match-meta">${item.matched_idea.commitment_hrs || '-'}h / week</div>
+              </div>
+            </div>
             <div>
-              <div class="match-name">${esc(item.matched_idea.owner.name)}</div>
-              <div class="match-meta">${item.matched_idea.commitment_hrs || '—'}h / week</div>
+              <div class="score-kicker">Score</div>
+              <div class="match-score">${Math.round((item.final_score || 0) * 100)}%</div>
             </div>
           </div>
-          <div style="text-align:right">
-            <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Score</div>
-            <div class="match-score">${Math.round((item.final_score || 0) * 100)}%</div>
+          <p class="match-problem">${esc(item.matched_idea.problem)}</p>
+          <div class="match-footer">
+            <div class="match-tags">${freshnessChip(item)}</div>
+            <div class="match-actions">
+              <button class="btn btn-primary btn-sm" data-action="connect" data-match-id="${item.match_id}">Connect</button>
+              <a class="btn btn-ghost btn-sm" href="#" title="Coming soon" data-action="view-placeholder">View</a>
+            </div>
           </div>
-        </div>
-        <p class="match-problem">${esc(item.matched_idea.problem)}</p>
-        <div class="match-footer">
-          <div class="match-tags">
-            <span class="tag-chip">${item.is_stale ? 'Updating' : 'Fresh'}</span>
-          </div>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-primary btn-sm" data-action="connect" data-match-id="${item.match_id}">Connect</button>
-            <a class="btn btn-ghost btn-sm" href="#" title="Coming soon" style="opacity:0.5;cursor:not-allowed" onclick="event.preventDefault()">View</a>
-          </div>
-        </div>
-      </div>
-    `,
+        </article>
+      `,
     )
     .join('');
 
   for (const button of grid.querySelectorAll('button[data-action="connect"]')) {
     button.addEventListener('click', async () => {
       button.setAttribute('disabled', 'disabled');
+      clearPageError();
       try {
         await apiFetch('/feedback', {
           method: 'POST',
@@ -85,8 +108,14 @@ function render(items) {
         button.textContent = 'Sent';
       } catch (error) {
         button.removeAttribute('disabled');
-        alert(error.message || 'Failed to send request.');
+        showPageError(error.message || 'Failed to send request.');
       }
+    });
+  }
+
+  for (const link of grid.querySelectorAll('[data-action="view-placeholder"]')) {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
     });
   }
 }
@@ -107,7 +136,7 @@ function aggregateAll() {
 
 function sortItems(items) {
   if (state.sort === 'recent') {
-    return items.sort((a, b) => (new Date(b.computed_at || 0) - new Date(a.computed_at || 0)));
+    return items.sort((a, b) => new Date(b.computed_at || 0) - new Date(a.computed_at || 0));
   }
   return items.sort((a, b) => b.final_score - a.final_score);
 }
@@ -129,35 +158,38 @@ async function refreshMatches(reset = true) {
     const merged = sortItems(aggregateAll());
     render(merged);
     const hasMore = state.ideas.some((idea) => state.cursors.get(idea.id));
-    loadMoreBtn.style.display = hasMore ? 'inline-flex' : 'none';
+    loadMoreBtn.hidden = !hasMore;
     return;
   }
 
   await fetchForIdea(state.selected, reset);
   const items = sortItems([...(state.buckets.get(state.selected) || [])]);
   render(items);
-  loadMoreBtn.style.display = state.cursors.get(state.selected) ? 'inline-flex' : 'none';
+  loadMoreBtn.hidden = !state.cursors.get(state.selected);
 }
 
 async function init() {
   state.ideas = await apiFetch('/ideas/me');
 
   ideaFilter.innerHTML = `
-    <option value="all">All Ideas (aggregated)</option>
+    <option value="all">All ideas (best overall matches)</option>
     ${state.ideas.map((idea) => `<option value="${idea.id}">${esc(idea.problem)}</option>`).join('')}
   `;
 
   ideaFilter.addEventListener('change', async () => {
+    clearPageError();
     state.selected = ideaFilter.value;
     await refreshMatches(true);
   });
 
   sortFilter.addEventListener('change', async () => {
+    clearPageError();
     state.sort = sortFilter.value;
     await refreshMatches(false);
   });
 
   loadMoreBtn.addEventListener('click', async () => {
+    clearPageError();
     await refreshMatches(false);
   });
 
@@ -165,13 +197,15 @@ async function init() {
 }
 
 try {
+  clearPageError();
   await init();
 } catch (error) {
   grid.innerHTML = `
-    <div class="empty-state" style="grid-column:1 / -1">
+    <div class="empty-state">
       <div class="empty-icon">!</div>
       <div class="empty-title">Unable to load matches</div>
       <div class="empty-text">${esc(error.message || 'Unknown error')}</div>
     </div>
   `;
+  loadMoreBtn.hidden = true;
 }

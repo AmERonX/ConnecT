@@ -35,7 +35,7 @@ for (const avatar of document.querySelectorAll('.avatar, .welcome-avatar')) {
 
 const welcomeTitle = document.querySelector('.welcome-title');
 if (welcomeTitle) {
-  welcomeTitle.textContent = `Welcome back, ${metaName} 👋`;
+  welcomeTitle.textContent = `Welcome back, ${metaName}`;
 }
 
 try {
@@ -61,28 +61,33 @@ try {
       ? events
           .map(
             (item) => `
-          <div class="activity-item slide-up">
-            <div class="activity-dot" style="background:var(--primary)"></div>
-            <span>${eventLabel(item)}</span>
-            <span class="activity-time">${new Date(item.created_at).toLocaleString()}</span>
-          </div>
-        `,
+              <div class="activity-item slide-up">
+                <div class="activity-dot activity-dot-primary"></div>
+                <span>${eventLabel(item)}</span>
+                <span class="activity-time">${new Date(item.created_at).toLocaleString()}</span>
+              </div>
+            `,
           )
           .join('')
       : `
-        <div class="activity-item slide-up">
-          <div class="activity-dot" style="background:var(--text-muted)"></div>
-          <span>No recent activity yet.</span>
-        </div>
-      `;
+          <div class="activity-item slide-up">
+            <div class="activity-dot"></div>
+            <span>No recent activity yet.</span>
+          </div>
+        `;
   }
 } catch (error) {
   const activityList = document.querySelector('.activity-list');
   if (activityList) {
+    const message = (error.message || 'Unknown error')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
     activityList.innerHTML = `
       <div class="activity-item slide-up">
-        <div class="activity-dot" style="background:var(--red)"></div>
-        <span>Failed to load dashboard data: ${(error.message || 'Unknown error').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+        <div class="activity-dot activity-dot-danger"></div>
+        <span>Failed to load dashboard data: ${message}</span>
       </div>
     `;
   }

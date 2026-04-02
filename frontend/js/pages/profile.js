@@ -7,6 +7,7 @@ bindSidebar();
 
 const editBtn = document.getElementById('edit-btn');
 const deleteBtn = document.getElementById('delete-account-btn');
+const modalRoot = document.getElementById('modal-root');
 
 function esc(value) {
   return String(value || '')
@@ -33,6 +34,45 @@ function setProfileField(selector, value) {
   }
 }
 
+function closeModal() {
+  if (!modalRoot) return;
+  modalRoot.classList.remove('open');
+  modalRoot.setAttribute('aria-hidden', 'true');
+  modalRoot.innerHTML = '';
+  document.body.classList.remove('modal-open');
+}
+
+function openModal(markup) {
+  if (!modalRoot) return;
+  modalRoot.innerHTML = markup;
+  modalRoot.classList.add('open');
+  modalRoot.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+
+  modalRoot.onclick = (event) => {
+    if (event.target === modalRoot || event.target.closest('[data-close-modal]')) {
+      closeModal();
+    }
+  };
+}
+
+function showMessageModal(title, message) {
+  openModal(`
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="modal-title">${esc(title)}</h2>
+          <p class="modal-subtitle">${esc(message)}</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-sm" type="button" data-close-modal>Close</button>
+      </div>
+    </div>
+  `);
+}
+
 async function loadProfile() {
   const [user, ideas, teams, skills] = await Promise.all([
     apiFetch('/users/me'),
@@ -55,24 +95,17 @@ async function loadProfile() {
     skillsGrid.innerHTML = (skills || []).length
       ? skills
           .map(
-            (skill) =>
-              `<span class="skill-tag" style="cursor:pointer" title="Click to remove" data-skill-id="${skill.id}">
-                 ${esc(skill.skill_name)}${skill.level ? ` (${esc(skill.level)})` : ''} <span style="opacity:0.5;margin-left:4px">×</span>
-               </span>`,
+            (skill) => `
+              <button type="button" class="skill-tag" data-skill-id="${skill.id}" title="Remove skill">
+                ${esc(skill.skill_name)}${skill.level ? ` (${esc(skill.level)})` : ''}
+              </button>
+            `,
           )
           .join('')
-      : '<span style="color:var(--text-secondary);font-size:0.875rem">No skills added yet.</span>';
+      : '<span class="muted">No skills added yet.</span>';
 
     for (const tag of skillsGrid.querySelectorAll('.skill-tag')) {
-      tag.addEventListener('click', async () => {
-        if (!confirm('Remove this skill?')) return;
-        try {
-          await apiFetch(`/users/me/skills/${tag.dataset.skillId}`, { method: 'DELETE' });
-          await loadProfile();
-        } catch (error) {
-          alert('Failed to delete skill: ' + (error.message || 'Unknown error'));
-        }
-      });
+      tag.addEventListener('click', () => openRemoveSkillModal(tag.dataset.skillId, tag.textContent.trim()));
     }
   }
 
@@ -80,7 +113,7 @@ async function loadProfile() {
   if (githubRow) {
     githubRow.innerHTML = user.github_url
       ? `<a href="${esc(user.github_url)}" target="_blank" rel="noreferrer">${esc(user.github_url)}</a>`
-      : '<span style="color:var(--text-muted);font-style:italic">Not added</span>';
+      : '<span class="muted">Not added</span>';
   }
 
   const preferenceValues = document.querySelectorAll('#preferences-section .social-value');
@@ -100,72 +133,201 @@ async function loadProfile() {
 let currentProfile = null;
 
 const VALID_STYLES = ['async', 'sync', 'flexible'];
+const VALID_LEVELS = ['beginner', 'intermediate', 'advanced'];
 
-async function editProfile() {
+function openEditProfileModal() {
   if (!currentProfile) return;
 
-  const name = prompt('Name', currentProfile.name || '') || currentProfile.name;
-  const github = prompt('GitHub URL', currentProfile.github_url || '') || null;
-  const teamSizeInput = prompt('Preferred team size', currentProfile.team_size_preference || '');
-  const teamSize = teamSizeInput ? Number(teamSizeInput) || null : null;
-  const workingStyle = prompt('Working style (async, sync, flexible)', currentProfile.working_style || '') || null;
+  openModal(`
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="modal-title">Edit profile</h2>
+          <p class="modal-subtitle">Update the details teammates use to understand your working style.</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+      </div>
+      <form class="modal-form" id="edit-profile-form">
+        <div class="form-group">
+          <label class="form-label" for="profile-name-input">Name</label>
+          <input class="form-input" id="profile-name-input" value="${esc(currentProfile.name || '')}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="profile-github-input">GitHub URL</label>
+          <input class="form-input" id="profile-github-input" value="${esc(currentProfile.github_url || '')}" placeholder="https://github.com/username">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="profile-team-size-input">Preferred team size</label>
+          <input class="form-input" id="profile-team-size-input" type="number" min="1" max="20" value="${currentProfile.team_size_preference || ''}" placeholder="3">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="profile-working-style-input">Working style</label>
+          <select class="form-select" id="profile-working-style-input">
+            <option value="">Choose a style</option>
+            ${VALID_STYLES.map((style) => `<option value="${style}" ${currentProfile.working_style === style ? 'selected' : ''}>${style}</option>`).join('')}
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
+          <button class="btn btn-primary btn-sm" type="submit">Save changes</button>
+        </div>
+      </form>
+    </div>
+  `);
 
-  if (workingStyle && !VALID_STYLES.includes(workingStyle.toLowerCase())) {
-    alert('Working style must be one of: async, sync, flexible');
-    return;
-  }
+  document.getElementById('edit-profile-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-  await apiFetch('/users/me', {
-    method: 'PATCH',
-    body: {
-      name,
-      github_url: github,
-      team_size_preference: teamSize,
-      working_style: workingStyle ? workingStyle.toLowerCase() : null,
-    },
+    const name = document.getElementById('profile-name-input')?.value?.trim();
+    const github = document.getElementById('profile-github-input')?.value?.trim() || null;
+    const teamSizeRaw = document.getElementById('profile-team-size-input')?.value;
+    const workingStyle = document.getElementById('profile-working-style-input')?.value || null;
+    const teamSize = teamSizeRaw ? Number(teamSizeRaw) || null : null;
+
+    if (workingStyle && !VALID_STYLES.includes(workingStyle)) {
+      showMessageModal('Invalid working style', 'Choose one of: async, sync, or flexible.');
+      return;
+    }
+
+    try {
+      await apiFetch('/users/me', {
+        method: 'PATCH',
+        body: {
+          name,
+          github_url: github,
+          team_size_preference: teamSize,
+          working_style: workingStyle,
+        },
+      });
+      closeModal();
+      currentProfile = await loadProfile();
+    } catch (error) {
+      showMessageModal('Unable to update profile', error.message || 'Unknown error');
+    }
   });
-
-  currentProfile = await loadProfile();
 }
 
-editBtn?.addEventListener('click', async () => {
-  try {
-    await editProfile();
-  } catch (error) {
-    alert(error.message || 'Failed to update profile.');
-  }
-});
+function openAddSkillModal() {
+  openModal(`
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="modal-title">Add skill</h2>
+          <p class="modal-subtitle">Make it easier for others to understand what you can contribute.</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+      </div>
+      <form class="modal-form" id="add-skill-form">
+        <div class="form-group">
+          <label class="form-label" for="skill-name-input">Skill name</label>
+          <input class="form-input" id="skill-name-input" placeholder="Python, React, UX research">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="skill-level-input">Skill level</label>
+          <select class="form-select" id="skill-level-input">
+            <option value="">Optional</option>
+            ${VALID_LEVELS.map((level) => `<option value="${level}">${level}</option>`).join('')}
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
+          <button class="btn btn-primary btn-sm" type="submit">Add skill</button>
+        </div>
+      </form>
+    </div>
+  `);
 
-deleteBtn?.addEventListener('click', async () => {
-  if (!confirm('Are you sure you want to permanently delete your account? This cannot be undone.')) return;
-  try {
-    await apiFetch('/users/me', { method: 'DELETE' });
-    await logout();
-  } catch (error) {
-    alert(error.message || 'Failed to delete account.');
-  }
-});
+  document.getElementById('add-skill-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-document.getElementById('add-skill-btn')?.addEventListener('click', async () => {
-  const skillName = prompt('Skill name (e.g. Python, React)');
-  if (!skillName?.trim()) return;
+    const skillName = document.getElementById('skill-name-input')?.value?.trim();
+    const level = document.getElementById('skill-level-input')?.value || null;
 
-  let level = prompt('Skill level (beginner, intermediate, advanced) - Optional') || null;
-  const validLevels = ['beginner', 'intermediate', 'advanced'];
-  
-  if (level && !validLevels.includes(level.toLowerCase())) {
-    alert('Invalid skill level. Must be beginner, intermediate, or advanced.');
-    return;
-  }
+    if (!skillName) {
+      showMessageModal('Skill name required', 'Enter a skill before saving.');
+      return;
+    }
 
-  try {
-    await apiFetch('/users/me/skills', {
-      method: 'POST',
-      body: { skill_name: skillName.trim(), level: level ? level.toLowerCase() : null }
-    });
-    await loadProfile();
-  } catch (error) {
-    alert(error.message || 'Failed to add skill.');
+    try {
+      await apiFetch('/users/me/skills', {
+        method: 'POST',
+        body: { skill_name: skillName, level },
+      });
+      closeModal();
+      await loadProfile();
+    } catch (error) {
+      showMessageModal('Unable to add skill', error.message || 'Unknown error');
+    }
+  });
+}
+
+function openRemoveSkillModal(skillId, skillLabel) {
+  openModal(`
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="modal-title">Remove skill</h2>
+          <p class="modal-subtitle">${esc(skillLabel)} will be removed from your public profile.</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
+        <button class="btn btn-danger btn-sm" type="button" id="confirm-remove-skill">Remove</button>
+      </div>
+    </div>
+  `);
+
+  document.getElementById('confirm-remove-skill')?.addEventListener('click', async () => {
+    try {
+      await apiFetch(`/users/me/skills/${skillId}`, { method: 'DELETE' });
+      closeModal();
+      await loadProfile();
+    } catch (error) {
+      showMessageModal('Unable to remove skill', error.message || 'Unknown error');
+    }
+  });
+}
+
+function openDeleteAccountModal() {
+  openModal(`
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="modal-title">Delete account</h2>
+          <p class="modal-subtitle">This permanently deletes your account, ideas, and team data.</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal aria-label="Close">X</button>
+      </div>
+      <div class="alert alert-error">
+        <span>!</span>
+        <span>This action cannot be undone.</span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" type="button" data-close-modal>Cancel</button>
+        <button class="btn btn-danger btn-sm" type="button" id="confirm-delete-account">Delete account</button>
+      </div>
+    </div>
+  `);
+
+  document.getElementById('confirm-delete-account')?.addEventListener('click', async () => {
+    try {
+      await apiFetch('/users/me', { method: 'DELETE' });
+      closeModal();
+      await logout();
+    } catch (error) {
+      showMessageModal('Unable to delete account', error.message || 'Unknown error');
+    }
+  });
+}
+
+editBtn?.addEventListener('click', openEditProfileModal);
+deleteBtn?.addEventListener('click', openDeleteAccountModal);
+document.getElementById('add-skill-btn')?.addEventListener('click', openAddSkillModal);
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && modalRoot?.classList.contains('open')) {
+    closeModal();
   }
 });
 
