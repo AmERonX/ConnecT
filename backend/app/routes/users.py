@@ -42,6 +42,7 @@ async def get_me(auth: AuthContext = Depends(get_auth_context)):
     if not row:
         raise AppError(code="NOT_FOUND", message="User profile not found.", status_code=404)
 
+    row["id"] = str(row["id"])
     row["created_at"] = row["created_at"].isoformat()
     return success_response(row)
 
@@ -86,6 +87,7 @@ async def patch_me(body: UserUpdateRequest, auth: AuthContext = Depends(get_auth
     if not row:
         raise AppError(code="NOT_FOUND", message="User profile not found.", status_code=404)
 
+    row["id"] = str(row["id"])
     row["created_at"] = row["created_at"].isoformat()
     return success_response(row)
 
