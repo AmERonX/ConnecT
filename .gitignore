@@ -4,7 +4,6 @@
 
 # ------ Secrets & local environment -------------------------
 backend/.env
-frontend/js/config.js
 
 # ------ Personal planning docs (not for public repo) --------
 Plan/
