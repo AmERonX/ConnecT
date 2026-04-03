@@ -4,5 +4,9 @@
 window.CONNECT_SUPABASE_URL = window.CONNECT_SUPABASE_URL || 'https://jkqkalodktcomicypjeb.supabase.co';
 window.CONNECT_SUPABASE_ANON_KEY = window.CONNECT_SUPABASE_ANON_KEY || 'sb_publishable_6qbzCQNjnXF3Q0je0EpaUA_kWjxYrZC';
 
-window.CONNECT_API_BASE = window.CONNECT_API_BASE || 'http://localhost:8000';
+// Auto-detect backend: use Vercel-hosted backend in production, localhost in dev.
+const _isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+window.CONNECT_API_BASE = window.CONNECT_API_BASE || (
+  _isLocalDev ? 'http://localhost:8000' : 'https://connec-t-backend.vercel.app'
+);
 
