@@ -40,6 +40,10 @@
     .profile-name { font-size: 1.375rem; font-weight: 700; }
     .profile-email { font-size: 0.875rem; color: var(--text-secondary); margin-top: 2px; }
 
+    .profile-feedback {
+      margin-bottom: 16px;
+    }
+
     .profile-stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -121,7 +125,6 @@
 
 <div class="app-shell">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <a href="dashboard.html" class="nav-logo">ConnecT</a>
@@ -172,8 +175,8 @@
     </header>
 
     <main class="main-content">
+      <div id="profile-feedback" class="profile-feedback"></div>
 
-      <!-- Profile banner -->
       <div class="profile-banner fade-in">
         <div class="profile-avatar-lg">…</div>
         <div>
@@ -185,7 +188,6 @@
         </div>
       </div>
 
-      <!-- Stats -->
       <div class="profile-stats stagger">
         <div class="profile-stat slide-up">
           <div class="p-stat-val">—</div>
@@ -201,17 +203,14 @@
         </div>
       </div>
 
-      <!-- Skills -->
       <div class="profile-section" id="skills-section">
         <div class="ps-header">
           <div class="ps-title">🏷️ Skills & Technologies</div>
           <button class="btn btn-ghost btn-sm" id="add-skill-btn">+ Add</button>
         </div>
-        <div class="skills-grid">
-        </div>
+        <div class="skills-grid"></div>
       </div>
 
-      <!-- Social links -->
       <div class="profile-section" id="links-section">
         <div class="ps-header">
           <div class="ps-title">🔗 Social Links</div>
@@ -222,7 +221,6 @@
         </div>
       </div>
 
-      <!-- Working Preferences -->
       <div class="profile-section" id="preferences-section">
         <div class="ps-header">
           <div class="ps-title">⚙️ Working Preferences</div>
@@ -241,7 +239,6 @@
         </div>
       </div>
 
-      <!-- Danger zone -->
       <div class="profile-section danger-zone">
         <div class="ps-header">
           <div class="ps-title danger-title">⚠️ Danger Zone</div>
@@ -251,8 +248,93 @@
         </p>
         <button class="btn btn-danger btn-sm" id="delete-account-btn">Delete Account</button>
       </div>
-
     </main>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="profile-edit-modal" hidden>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="profile-edit-title">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="profile-edit-title">Edit profile</div>
+        <div class="modal-subtitle">Update the details teammates see when they discover you.</div>
+      </div>
+      <button type="button" class="modal-close" data-close-modal="profile-edit-modal" aria-label="Close edit profile modal">×</button>
+    </div>
+    <form id="profile-form">
+      <div class="modal-body">
+        <div id="profile-form-error" hidden></div>
+        <div class="modal-form-grid">
+          <div class="form-group span-2">
+            <label class="form-label" for="profile-name-input">Name</label>
+            <input class="form-input" id="profile-name-input" name="name" type="text" maxlength="120" required>
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="profile-github-input">GitHub URL</label>
+            <input class="form-input" id="profile-github-input" name="github_url" type="text" placeholder="https://github.com/username">
+            <span class="form-hint">Optional. You can paste a full URL or just your GitHub profile path.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profile-team-size-input">Preferred team size</label>
+            <input class="form-input" id="profile-team-size-input" name="team_size_preference" type="number" min="1" max="20" placeholder="e.g. 4">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profile-working-style-input">Working style</label>
+            <select class="form-select" id="profile-working-style-input" name="working_style">
+              <option value="">Not set</option>
+              <option value="async">Async</option>
+              <option value="sync">Sync</option>
+              <option value="flexible">Flexible</option>
+            </select>
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="profile-existing-team-input">Already in a team?</label>
+            <select class="form-select" id="profile-existing-team-input" name="has_existing_team">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close-modal="profile-edit-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="profile-save-btn">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="skill-modal" hidden>
+  <div class="modal-panel modal-panel-sm" role="dialog" aria-modal="true" aria-labelledby="skill-modal-title">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="skill-modal-title">Add skill</div>
+        <div class="modal-subtitle">Show teammates what you can contribute.</div>
+      </div>
+      <button type="button" class="modal-close" data-close-modal="skill-modal" aria-label="Close add skill modal">×</button>
+    </div>
+    <form id="skill-form">
+      <div class="modal-body">
+        <div id="skill-form-error" hidden></div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="skill-name-input">Skill name</label>
+          <input class="form-input" id="skill-name-input" name="skill_name" type="text" maxlength="120" placeholder="e.g. Python, React" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="skill-level-input">Level</label>
+          <select class="form-select" id="skill-level-input" name="level">
+            <option value="">Not set</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close-modal="skill-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="skill-save-btn">Add skill</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -261,7 +343,3 @@
 
 </body>
 </html>
-
-
-
-

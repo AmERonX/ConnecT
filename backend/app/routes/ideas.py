@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.auth import AuthContext, get_auth_context
 from app.db import db, ensure_user_exists, fetch_dict, fetchrow_dict
@@ -10,6 +10,7 @@ from app.responses import success_response
 from app.services.canonicalize import canonicalize, get_client
 from app.services.freshness import compute_idea_freshness
 from app.services.idea_updates import build_idea_update_payload
+from app.services.pipeline import enqueue_pipeline_run
 from app.services.rate_limiter import canonicalize_rate_limiter
 
 router = APIRouter(prefix="/ideas", tags=["ideas"])
@@ -69,7 +70,11 @@ async def canonicalize_idea(body: CanonicalizeRequest, auth: AuthContext = Depen
 
 
 @router.post("")
-async def create_idea(body: IdeaCreateRequest, auth: AuthContext = Depends(get_auth_context)):
+async def create_idea(
+    body: IdeaCreateRequest,
+    background_tasks: BackgroundTasks,
+    auth: AuthContext = Depends(get_auth_context),
+):
     if not body.canonical_text.strip():
         raise AppError(code="VALIDATION_ERROR", message="canonical_text is required.", status_code=422)
 
@@ -99,6 +104,7 @@ async def create_idea(body: IdeaCreateRequest, auth: AuthContext = Depends(get_a
 
         serialized = await _serialize_idea(conn, row, auth.user_id)
 
+    enqueue_pipeline_run(background_tasks)
     return success_response(serialized, status_code=201)
 
 
@@ -152,7 +158,12 @@ async def get_idea(idea_id: str, auth: AuthContext = Depends(get_auth_context)):
 
 
 @router.patch("/{idea_id}")
-async def patch_idea(idea_id: str, body: IdeaUpdateRequest, auth: AuthContext = Depends(get_auth_context)):
+async def patch_idea(
+    idea_id: str,
+    body: IdeaUpdateRequest,
+    background_tasks: BackgroundTasks,
+    auth: AuthContext = Depends(get_auth_context),
+):
     requested_fields = body.model_dump(exclude_none=True)
 
     async with db.connection(auth.user_id) as conn:
@@ -199,6 +210,9 @@ async def patch_idea(idea_id: str, body: IdeaUpdateRequest, auth: AuthContext = 
             updated = existing
 
         serialized = await _serialize_idea(conn, updated, auth.user_id)
+
+    if payload.get("embedding_stale") is True:
+        enqueue_pipeline_run(background_tasks)
 
     return success_response(serialized)
 

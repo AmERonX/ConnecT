@@ -1,6 +1,7 @@
 import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
+import { bindTopbarProfile } from '../topbar.js';
 
 function esc(value) {
   return String(value || '')
@@ -22,8 +23,9 @@ function freshnessBadge(freshness) {
   return `<span class="badge ${chosen.cls}"><span class="badge-dot"></span> ${chosen.label}</span>`;
 }
 
-await requireAuth();
+const session = await requireAuth();
 bindSidebar();
+bindTopbarProfile(session);
 
 const grid = document.querySelector('.ideas-grid');
 

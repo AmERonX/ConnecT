@@ -5,7 +5,9 @@ from typing import List
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+env_root = Path(__file__).resolve().parent.parent
+load_dotenv(env_root / ".env")
+load_dotenv(env_root / ".env.local", override=True)
 
 
 @dataclass(frozen=True)

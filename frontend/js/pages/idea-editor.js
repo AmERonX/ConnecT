@@ -1,10 +1,13 @@
 import { requireAuth } from '../auth.js';
 import { apiFetch, ApiError } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
+import { bindTopbarProfile } from '../topbar.js';
+import { showConfirmDialog } from '../ui/dialogs.js';
 import { initTagInput } from '../tags.js';
 
-await requireAuth();
+const session = await requireAuth();
 bindSidebar();
+bindTopbarProfile(session);
 
 const params = new URLSearchParams(window.location.search);
 const ideaId = params.get('id');
@@ -14,6 +17,7 @@ const form = document.getElementById('idea-form');
 const analyzeBtn = document.getElementById('submit-btn');
 const saveBtn = document.getElementById('save-btn');
 const editBtn = document.getElementById('back-edit-btn');
+const deleteIdeaBtn = document.getElementById('delete-idea-btn');
 const canonicalTextEl = document.getElementById('canonical-text');
 const feedbackListEl = document.getElementById('feedback-list');
 const topbarTitle = document.querySelector('.topbar-title');
@@ -155,6 +159,7 @@ async function loadIdea() {
 
   if (topbarTitle) topbarTitle.textContent = 'Edit Idea';
   if (editorTitle) editorTitle.textContent = 'Edit your project idea';
+  if (deleteIdeaBtn) deleteIdeaBtn.style.display = 'inline-flex';
 
   if (idea.freshness === 'needs_input' || !canonicalText) {
     approvedIntentSnapshot = null;
@@ -281,6 +286,30 @@ function backToEdit() {
   showState('state-empty');
 }
 
+async function deleteIdea() {
+  if (!isEditMode || !ideaId || !deleteIdeaBtn) return;
+
+  const confirmed = await showConfirmDialog({
+    title: 'Delete this idea?',
+    message: 'This will remove the idea from your active list and stop it from showing in recommendations.',
+    confirmLabel: 'Delete idea',
+    destructive: true,
+  });
+
+  if (!confirmed) return;
+
+  deleteIdeaBtn.setAttribute('disabled', 'disabled');
+  clearInlineError();
+
+  try {
+    await apiFetch(`/ideas/${ideaId}`, { method: 'DELETE' });
+    window.location.href = '/ideas.html';
+  } catch (error) {
+    deleteIdeaBtn.removeAttribute('disabled');
+    showInlineError(error instanceof ApiError ? error.message : 'Failed to delete idea.');
+  }
+}
+
 for (const id of ['problem', 'solution', 'approach', 'hours', 'weeks']) {
   document.getElementById(id)?.addEventListener('input', syncCanonicalValidity);
 }
@@ -292,6 +321,7 @@ document.getElementById('tag-container')?.addEventListener('click', () => {
 analyzeBtn?.addEventListener('click', analyze);
 saveBtn?.addEventListener('click', saveIdea);
 editBtn?.addEventListener('click', backToEdit);
+deleteIdeaBtn?.addEventListener('click', deleteIdea);
 
 if (form) {
   form.addEventListener('submit', (event) => event.preventDefault());

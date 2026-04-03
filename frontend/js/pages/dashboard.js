@@ -1,6 +1,7 @@
 import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
+import { bindTopbarProfile } from '../topbar.js';
 
 function initials(name) {
   return (name || 'U')
@@ -25,11 +26,12 @@ if (!session) {
 }
 
 bindSidebar();
+bindTopbarProfile(session);
 
 const metaName = session.user?.user_metadata?.name || 'Builder';
 const avatarText = initials(metaName);
 
-for (const avatar of document.querySelectorAll('.avatar, .welcome-avatar')) {
+for (const avatar of document.querySelectorAll('.welcome-avatar')) {
   avatar.textContent = avatarText;
 }
 

@@ -1,6 +1,7 @@
 import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
+import { bindTopbarProfile } from '../topbar.js';
 
 function esc(value) {
   return String(value || '')
@@ -15,8 +16,9 @@ function firstLetter(value) {
   return String(value || 'U').trim().charAt(0).toUpperCase() || 'U';
 }
 
-await requireAuth();
+const session = await requireAuth();
 bindSidebar();
+bindTopbarProfile(session);
 
 const container = document.querySelector('.teams-grid');
 
