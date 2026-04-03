@@ -10,8 +10,12 @@ const BATCH_SIZE = 10;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-serve(async () => {
+serve(async (req) => {
   try {
+    if (req.headers.get("Authorization") !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+
     const { data: staleIdeas, error: fetchErr } = await supabase.rpc("claim_stale_ideas", {
       batch_limit: BATCH_SIZE,
     });

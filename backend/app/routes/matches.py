@@ -28,7 +28,7 @@ async def list_matches_for_idea(
     min_score: float = Query(default=0.0),
     auth: AuthContext = Depends(get_auth_context),
 ):
-    async with db.connection(auth.user_id) as conn:
+    async with db.service_connection() as conn:
         viewer_idea = await fetchrow_dict(
             conn,
             """

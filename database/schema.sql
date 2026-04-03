@@ -433,7 +433,7 @@ DECLARE
   new_match_id UUID;
 BEGIN
   FOR idea_row IN
-    SELECT ie.idea_id
+    SELECT ie.idea_id, pi.user_id
     FROM idea_embeddings ie
     JOIN project_ideas pi ON pi.id = ie.idea_id
     WHERE pi.embedding_stale = false
@@ -446,8 +446,10 @@ BEGIN
              1 - (ie1.embedding <=> ie2.embedding) AS similarity
       FROM idea_embeddings ie1
       CROSS JOIN idea_embeddings ie2
+      JOIN project_ideas pi2 ON pi2.id = ie2.idea_id
       WHERE ie1.idea_id = idea_row.idea_id
         AND ie2.idea_id != idea_row.idea_id
+        AND pi2.user_id != idea_row.user_id
         AND ie1.embedding_type = 'full'
         AND ie2.embedding_type = 'full'
       ORDER BY ie1.embedding <=> ie2.embedding
