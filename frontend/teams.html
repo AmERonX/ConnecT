@@ -160,91 +160,10 @@
       </div>
 
       <div class="teams-grid stagger">
-        <!-- Team 1 -->
-        <div class="team-row slide-up">
-          <div class="team-info">
-            <div class="team-icon-wrap" style="background:rgba(108,99,255,0.12)">🧠</div>
-            <div>
-              <div class="team-name">NLP Study Group</div>
-              <div class="team-idea">Based on: AI Study Partner Platform</div>
-            </div>
-          </div>
-          <div class="team-meta">
-            <div class="meta-item">
-              <span class="meta-value">3</span>
-              <span class="meta-label">Members</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-value">5d</span>
-              <span class="meta-label">Formed</span>
-            </div>
-          </div>
-          <div class="team-actions">
-            <button class="btn btn-ghost btn-sm" onclick="toggleDetail('detail-1')">View</button>
-          </div>
-        </div>
-
-        <!-- Team detail (expandable) -->
-        <div class="team-detail-panel" id="detail-1" style="display:none">
-          <div class="detail-header">
-            <div class="detail-title">NLP Study Group — Members</div>
-            <button class="btn btn-ghost btn-sm" onclick="toggleDetail('detail-1')">Close</button>
-          </div>
-          <div class="member-row">
-            <div class="avatar" style="background:var(--grad-primary)">R</div>
-            <div>
-              <div class="member-name">Ron (You)</div>
-              <div class="member-role">Joined 5 days ago</div>
-            </div>
-          </div>
-          <div class="member-row">
-            <div class="avatar" style="background:linear-gradient(135deg,#f093fb,#f5576c)">A</div>
-            <div>
-              <div class="member-name">Aanya Mehta</div>
-              <div class="member-role">Joined 5 days ago</div>
-            </div>
-            <a href="profile.html" class="btn btn-ghost btn-sm" style="margin-left:auto">View Profile</a>
-          </div>
-          <div class="member-row">
-            <div class="avatar" style="background:linear-gradient(135deg,#89f7fe,#66a6ff)">P</div>
-            <div>
-              <div class="member-name">Priya Nair</div>
-              <div class="member-role">Joined 3 days ago</div>
-            </div>
-            <a href="profile.html" class="btn btn-ghost btn-sm" style="margin-left:auto">View Profile</a>
-          </div>
-        </div>
-
-        <!-- Pending connection requests section -->
-        <div style="margin-top:16px">
-          <h2 style="font-size:1rem;font-weight:700;margin-bottom:14px">Pending Connection Requests</h2>
-
-          <div class="team-row slide-up" style="border-color:rgba(0,212,255,0.15)">
-            <div class="team-info">
-              <div class="avatar" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">K</div>
-              <div>
-                <div class="team-name">Karan Patel</div>
-                <div class="team-idea">Wants to connect on: Open-Source Contributor Finder</div>
-              </div>
-            </div>
-            <div class="team-actions">
-              <button class="btn btn-primary btn-sm">Accept</button>
-              <button class="btn btn-ghost btn-sm">Decline</button>
-            </div>
-          </div>
-
-          <div class="team-row slide-up" style="margin-top:10px;border-color:rgba(245,158,11,0.15)">
-            <div class="team-info">
-              <div class="avatar" style="background:linear-gradient(135deg,#f6d365,#fda085)">D</div>
-              <div>
-                <div class="team-name">Dev Gupta</div>
-                <div class="team-idea">You sent a request · Smart Campus Navigation</div>
-              </div>
-            </div>
-            <div class="team-actions">
-              <span class="badge badge-partial"><span class="badge-dot"></span> Pending</span>
-            </div>
-          </div>
+        <div class="empty-state">
+          <div class="empty-icon">⌛</div>
+          <div class="empty-title">Loading teams</div>
+          <div class="empty-text">Fetching team activity and pending requests…</div>
         </div>
       </div>
     </main>
@@ -256,5 +175,6 @@
 
 </body>
 </html>
+
 
 

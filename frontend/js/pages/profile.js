@@ -33,13 +33,20 @@ function setProfileField(selector, value) {
   }
 }
 
+async function loadWithFallback(path, fallback) {
+  try {
+    const result = await apiFetch(path);
+    return result ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 async function loadProfile() {
-  const [user, ideas, teams, skills] = await Promise.all([
-    apiFetch('/users/me'),
-    apiFetch('/ideas/me'),
-    apiFetch('/teams'),
-    apiFetch('/users/me/skills'),
-  ]);
+  const user = await apiFetch('/users/me');
+  const ideas = await loadWithFallback('/ideas/me', []);
+  const teams = await loadWithFallback('/teams', { teams: [] });
+  const skills = await loadWithFallback('/users/me/skills', []);
 
   setProfileField('.profile-name', user.name);
   setProfileField('.profile-email', user.email);
@@ -152,7 +159,7 @@ document.getElementById('add-skill-btn')?.addEventListener('click', async () => 
 
   let level = prompt('Skill level (beginner, intermediate, advanced) - Optional') || null;
   const validLevels = ['beginner', 'intermediate', 'advanced'];
-  
+
   if (level && !validLevels.includes(level.toLowerCase())) {
     alert('Invalid skill level. Must be beginner, intermediate, or advanced.');
     return;
@@ -161,7 +168,7 @@ document.getElementById('add-skill-btn')?.addEventListener('click', async () => 
   try {
     await apiFetch('/users/me/skills', {
       method: 'POST',
-      body: { skill_name: skillName.trim(), level: level ? level.toLowerCase() : null }
+      body: { skill_name: skillName.trim(), level: level ? level.toLowerCase() : null },
     });
     await loadProfile();
   } catch (error) {
@@ -177,4 +184,3 @@ try {
     skillsSection.innerHTML = `<div class="alert alert-error"><span>!</span><span>${esc(error.message || 'Failed to load profile')}</span></div>`;
   }
 }
-

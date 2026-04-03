@@ -132,10 +132,7 @@
       <div class="filter-bar">
         <span class="filter-label">Filter by idea:</span>
         <select class="filter-select" id="idea-filter">
-          <option value="all">All Ideas (aggregated)</option>
-          <option value="1">AI Study Partner Platform</option>
-          <option value="2">Smart Campus Navigation</option>
-          <option value="3">Open-Source Contributor Finder</option>
+          <option value="all">Loading ideas…</option>
         </select>
         <span class="filter-label" style="margin-left:12px">Sort:</span>
         <select class="filter-select" id="sort-filter" style="min-width:140px">
@@ -144,176 +141,15 @@
         </select>
       </div>
 
-      <div class="results-count">Showing <strong>6</strong> matches</div>
+      <div class="results-count">Loading matches…</div>
 
       <!-- Match grid -->
       <div class="match-grid stagger">
-
-        <div class="match-card slide-up">
-          <div class="match-header">
-            <div class="match-user">
-              <div class="avatar" style="background:linear-gradient(135deg,#f093fb,#f5576c)">A</div>
-              <div>
-                <div class="match-name">Aanya Mehta</div>
-                <div class="match-meta">10h / week · 8 weeks</div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Score</div>
-              <div class="match-score">91%</div>
-            </div>
-          </div>
-          <p class="match-problem">Building an adaptive quizzing system that pairs students based on complementary learning styles and course overlaps using NLP.</p>
-          <div class="match-footer">
-            <div class="match-tags">
-              <span class="tag-chip">Education</span>
-              <span class="tag-chip">NLP</span>
-              <span class="tag-chip">Python</span>
-            </div>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-primary btn-sm">Connect</button>
-              <button class="btn btn-ghost btn-sm">View</button>
-            </div>
-          </div>
+        <div class="empty-state" style="grid-column:1 / -1">
+          <div class="empty-icon">⌛</div>
+          <div class="empty-title">Loading matches</div>
+          <div class="empty-text">Fetching recommendations for your ideas…</div>
         </div>
-
-        <div class="match-card slide-up">
-          <div class="match-header">
-            <div class="match-user">
-              <div class="avatar" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">K</div>
-              <div>
-                <div class="match-name">Karan Patel</div>
-                <div class="match-meta">15h / week · 12 weeks</div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Score</div>
-              <div class="match-score">87%</div>
-            </div>
-          </div>
-          <p class="match-problem">A recommendation engine for open-source projects that matches contributors with repos based on code style and stack preferences.</p>
-          <div class="match-footer">
-            <div class="match-tags">
-              <span class="tag-chip">Open Source</span>
-              <span class="tag-chip">ML</span>
-            </div>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-primary btn-sm">Connect</button>
-              <button class="btn btn-ghost btn-sm">View</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="match-card slide-up">
-          <div class="match-header">
-            <div class="match-user">
-              <div class="avatar" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)">S</div>
-              <div>
-                <div class="match-name">Sara Kim</div>
-                <div class="match-meta">8h / week · 6 weeks</div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Score</div>
-              <div class="match-score">84%</div>
-            </div>
-          </div>
-          <p class="match-problem">Indoor campus navigation using BLE beacons and crowd-sourced floor plans with real-time occupancy data.</p>
-          <div class="match-footer">
-            <div class="match-tags">
-              <span class="tag-chip">IoT</span>
-              <span class="tag-chip">Mobile</span>
-              <span class="tag-chip">Maps</span>
-            </div>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-primary btn-sm">Connect</button>
-              <button class="btn btn-ghost btn-sm">View</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="match-card slide-up">
-          <div class="match-header">
-            <div class="match-user">
-              <div class="avatar" style="background:linear-gradient(135deg,#f6d365,#fda085)">D</div>
-              <div>
-                <div class="match-name">Dev Gupta</div>
-                <div class="match-meta">12h / week · 10 weeks</div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Score</div>
-              <div class="match-score">79%</div>
-            </div>
-          </div>
-          <p class="match-problem">A peer code-review platform for CS students that uses static analysis to auto-surface common mistakes and suggest reviewers.</p>
-          <div class="match-footer">
-            <div class="match-tags">
-              <span class="tag-chip">DevTools</span>
-              <span class="tag-chip">AST</span>
-            </div>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-primary btn-sm">Connect</button>
-              <button class="btn btn-ghost btn-sm">View</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="match-card slide-up">
-          <div class="match-header">
-            <div class="match-user">
-              <div class="avatar" style="background:linear-gradient(135deg,#89f7fe,#66a6ff)">P</div>
-              <div>
-                <div class="match-name">Priya Nair</div>
-                <div class="match-meta">6h / week · 8 weeks</div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Score</div>
-              <div class="match-score">76%</div>
-            </div>
-          </div>
-          <p class="match-problem">Mental health chatbot designed for college students using CBT techniques, integrated with university counseling scheduling.</p>
-          <div class="match-footer">
-            <div class="match-tags">
-              <span class="tag-chip">Health</span>
-              <span class="tag-chip">Chatbot</span>
-              <span class="tag-chip">NLP</span>
-            </div>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-primary btn-sm">Connect</button>
-              <button class="btn btn-ghost btn-sm">View</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="match-card slide-up">
-          <div class="match-header">
-            <div class="match-user">
-              <div class="avatar" style="background:linear-gradient(135deg,#ffecd2,#fcb69f)">M</div>
-              <div>
-                <div class="match-name">Marco Silva</div>
-                <div class="match-meta">10h / week · 6 weeks</div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Score</div>
-              <div class="match-score">72%</div>
-            </div>
-          </div>
-          <p class="match-problem">Gamified sustainability tracker for university dorms that monitors energy usage and creates inter-dorm competitions.</p>
-          <div class="match-footer">
-            <div class="match-tags">
-              <span class="tag-chip">Sustainability</span>
-              <span class="tag-chip">IoT</span>
-            </div>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-primary btn-sm">Connect</button>
-              <button class="btn btn-ghost btn-sm">View</button>
-            </div>
-          </div>
-        </div>
-
       </div>
 
       <div style="margin-top:18px;display:flex;justify-content:center">
@@ -328,6 +164,8 @@
 
 </body>
 </html>
+
+
 
 
 

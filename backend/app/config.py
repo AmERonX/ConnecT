@@ -18,6 +18,12 @@ class Settings:
     supabase_service_db_url: str
     api_port: int
     cors_origins: List[str]
+    db_pool_min_size: int
+    db_pool_max_size: int
+    db_service_pool_min_size: int
+    db_service_pool_max_size: int
+    db_pool_acquire_timeout: float
+    db_statement_cache_size: int
     llm_model: str = "command-r-08-2024"
     embedding_model: str = "embed-english-v3.0"
     temperature: int = 0
@@ -55,6 +61,12 @@ def load_settings() -> Settings:
         supabase_service_db_url=service_db_url,
         api_port=int(os.getenv("API_PORT", "8000")),
         cors_origins=[item.strip() for item in cors_raw.split(",") if item.strip()],
+        db_pool_min_size=int(os.getenv("DB_POOL_MIN_SIZE", "0")),
+        db_pool_max_size=int(os.getenv("DB_POOL_MAX_SIZE", "4")),
+        db_service_pool_min_size=int(os.getenv("DB_SERVICE_POOL_MIN_SIZE", "0")),
+        db_service_pool_max_size=int(os.getenv("DB_SERVICE_POOL_MAX_SIZE", "2")),
+        db_pool_acquire_timeout=float(os.getenv("DB_POOL_ACQUIRE_TIMEOUT", "5")),
+        db_statement_cache_size=int(os.getenv("DB_STATEMENT_CACHE_SIZE", "0")),
     )
 
 

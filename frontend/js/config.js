@@ -4,4 +4,5 @@
 window.CONNECT_SUPABASE_URL = window.CONNECT_SUPABASE_URL || 'https://jkqkalodktcomicypjeb.supabase.co';
 window.CONNECT_SUPABASE_ANON_KEY = window.CONNECT_SUPABASE_ANON_KEY || 'sb_publishable_6qbzCQNjnXF3Q0je0EpaUA_kWjxYrZC';
 
-window.CONNECT_API_BASE = window.CONNECT_API_BASE || 'https://connec-t-backend.vercel.app';
+window.CONNECT_API_BASE = window.CONNECT_API_BASE || 'http://localhost:8000';
+

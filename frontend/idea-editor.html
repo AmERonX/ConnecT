@@ -197,9 +197,7 @@
 
             <div class="form-group">
               <label class="form-label">Tags</label>
-              <div class="tag-input-container" id="tag-container" onclick="document.getElementById('tag-field').focus()">
-                <span class="tag-chip">Education <span class="tag-chip-remove" onclick="this.parentElement.remove()">✕</span></span>
-                <span class="tag-chip">NLP <span class="tag-chip-remove" onclick="this.parentElement.remove()">✕</span></span>
+              <div class="tag-input-container" id="tag-container">
                 <input class="tag-input" id="tag-field" placeholder="Type and press Enter…">
               </div>
               <span class="form-hint">Press Enter to add a tag</span>
@@ -248,16 +246,7 @@
               <span>⚠️</span>
               <span>The AI needs more detail before it can create your summary</span>
             </div>
-            <ul class="feedback-list" id="feedback-list">
-              <li class="feedback-item">
-                <span class="feedback-bullet">→</span>
-                Your problem statement is too vague. Who specifically has this problem?
-              </li>
-              <li class="feedback-item">
-                <span class="feedback-bullet">→</span>
-                Consider adding how your approach differs from existing solutions.
-              </li>
-            </ul>
+            <ul class="feedback-list" id="feedback-list"></ul>
             <div style="margin-top:16px;font-size:0.8125rem;color:var(--text-secondary)">
               Update your input on the left and click "Analyse with AI" again.
             </div>
@@ -270,9 +259,7 @@
               <span>AI generated your canonical summary. Review it below.</span>
             </div>
 
-            <div class="canon-text" id="canonical-text">
-              The project addresses the challenge of students being unable to find study partners who complement their weak areas. The proposed solution is an AI-powered platform that uses NLP to analyse learning styles and match students with complementary knowledge gaps. The approach uses embedding-based similarity matching with an adaptive quiz intake form to profile each student. The system targets education and leverages NLP techniques.
-            </div>
+            <div class="canon-text" id="canonical-text"></div>
 
             <div class="form-actions">
               <button id="save-btn" class="btn btn-primary btn-lg" style="flex:1">
@@ -301,5 +288,6 @@
 
 </body>
 </html>
+
 
 

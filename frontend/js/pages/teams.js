@@ -11,6 +11,10 @@ function esc(value) {
     .replaceAll("'", '&#039;');
 }
 
+function firstLetter(value) {
+  return String(value || 'U').trim().charAt(0).toUpperCase() || 'U';
+}
+
 await requireAuth();
 bindSidebar();
 
@@ -41,12 +45,12 @@ function renderTeams(data) {
           <div class="team-icon-wrap" style="background:rgba(108,99,255,0.12)">👥</div>
           <div>
             <div class="team-name">${esc(team.name || 'Unnamed Team')}</div>
-            <div class="team-idea">${team.members.length} members</div>
+            <div class="team-idea">${(team.members || []).length} members</div>
           </div>
         </div>
         <div class="team-meta">
           <div class="meta-item">
-            <span class="meta-value">${team.members.length}</span>
+            <span class="meta-value">${(team.members || []).length}</span>
             <span class="meta-label">Members</span>
           </div>
           <div class="meta-item">
@@ -59,13 +63,13 @@ function renderTeams(data) {
         <div class="detail-header">
           <div class="detail-title">Members</div>
         </div>
-        ${team.members
+        ${(team.members || [])
           .map(
             (member) => `
           <div class="member-row">
-            <div class="avatar">${esc(member.name.charAt(0).toUpperCase())}</div>
+            <div class="avatar">${esc(firstLetter(member.name))}</div>
             <div>
-              <div class="member-name">${esc(member.name)}</div>
+              <div class="member-name">${esc(member.name || 'Unknown member')}</div>
             </div>
           </div>
         `,
@@ -87,10 +91,10 @@ function renderTeams(data) {
                 (item) => `
           <div class="team-row slide-up" style="border-color:rgba(0,212,255,0.15)">
             <div class="team-info">
-              <div class="avatar">${esc(item.sender.name.charAt(0).toUpperCase())}</div>
+              <div class="avatar">${esc(firstLetter(item.sender?.name))}</div>
               <div>
-                <div class="team-name">${esc(item.sender.name)}</div>
-                <div class="team-idea">Wants to connect on: ${esc(item.my_idea.problem)}</div>
+                <div class="team-name">${esc(item.sender?.name || 'Unknown user')}</div>
+                <div class="team-idea">Wants to connect on: ${esc(item.my_idea?.problem || 'Unknown idea')}</div>
               </div>
             </div>
             <div class="team-actions">
@@ -111,9 +115,9 @@ function renderTeams(data) {
                 (item) => `
           <div class="team-row slide-up" style="margin-top:10px;border-color:rgba(245,158,11,0.15)">
             <div class="team-info">
-              <div class="avatar">${esc(item.receiver.name.charAt(0).toUpperCase())}</div>
+              <div class="avatar">${esc(firstLetter(item.receiver?.name))}</div>
               <div>
-                <div class="team-name">${esc(item.receiver.name)}</div>
+                <div class="team-name">${esc(item.receiver?.name || 'Unknown user')}</div>
                 <div class="team-idea">You sent a request</div>
               </div>
             </div>

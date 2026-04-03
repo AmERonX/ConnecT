@@ -29,18 +29,6 @@ const grid = document.querySelector('.ideas-grid');
 
 try {
   const ideas = await apiFetch('/ideas/me');
-  const matchCounts = await Promise.all(
-    ideas.map(async (idea) => {
-      try {
-        const result = await apiFetch(`/ideas/${idea.id}/matches?limit=1`);
-        return { ideaId: idea.id, total: result?.total || 0 };
-      } catch {
-        return { ideaId: idea.id, total: 0 };
-      }
-    }),
-  );
-
-  const countMap = new Map(matchCounts.map((item) => [item.ideaId, item.total]));
 
   grid.innerHTML =
     ideas
@@ -56,7 +44,7 @@ try {
           <div style="display:flex;gap:5px;flex-wrap:wrap">
             ${(idea.tags || []).map((tag) => `<span class="tag-chip">${esc(tag)}</span>`).join('')}
           </div>
-          <div class="idea-matches">${countMap.get(idea.id) || 0} matches</div>
+          <div class="idea-matches">${Number(idea.match_count || 0)} matches</div>
         </div>
       </div>
     `,

@@ -11,6 +11,14 @@ function esc(value) {
     .replaceAll("'", '&#039;');
 }
 
+function safeExternalUrl(value) {
+  const normalized = String(value || '').trim();
+  if (!/^https?:\/\//i.test(normalized)) {
+    return null;
+  }
+  return normalized;
+}
+
 await requireAuth();
 bindSidebar();
 
@@ -43,15 +51,23 @@ function render(items) {
   }
 
   grid.innerHTML = items
-    .map(
-      (item) => `
+    .map((item) => {
+      const ownerName = item?.matched_idea?.owner?.name || 'Unknown User';
+      const ownerInitial = ownerName.charAt(0).toUpperCase() || 'U';
+      const githubUrl = safeExternalUrl(item?.matched_idea?.owner?.github_url);
+
+      const profileAction = githubUrl
+        ? `<a class="btn btn-ghost btn-sm" href="${esc(githubUrl)}" target="_blank" rel="noreferrer noopener">GitHub</a>`
+        : '<button class="btn btn-ghost btn-sm" type="button" disabled title="No public profile linked">Profile N/A</button>';
+
+      return `
       <div class="match-card slide-up">
         <div class="match-header">
           <div class="match-user">
-            <div class="avatar">${esc((item.matched_idea.owner.name || 'U').charAt(0).toUpperCase())}</div>
+            <div class="avatar">${esc(ownerInitial)}</div>
             <div>
-              <div class="match-name">${esc(item.matched_idea.owner.name)}</div>
-              <div class="match-meta">${item.matched_idea.commitment_hrs || '—'}h / week</div>
+              <div class="match-name">${esc(ownerName)}</div>
+              <div class="match-meta">${item?.matched_idea?.commitment_hrs || '—'}h / week</div>
             </div>
           </div>
           <div style="text-align:right">
@@ -59,19 +75,19 @@ function render(items) {
             <div class="match-score">${Math.round((item.final_score || 0) * 100)}%</div>
           </div>
         </div>
-        <p class="match-problem">${esc(item.matched_idea.problem)}</p>
+        <p class="match-problem">${esc(item?.matched_idea?.problem || 'No problem statement available.')}</p>
         <div class="match-footer">
           <div class="match-tags">
             <span class="tag-chip">${item.is_stale ? 'Updating' : 'Fresh'}</span>
           </div>
           <div style="display:flex;gap:6px">
             <button class="btn btn-primary btn-sm" data-action="connect" data-match-id="${item.match_id}">Connect</button>
-            <a class="btn btn-ghost btn-sm" href="#" title="Coming soon" style="opacity:0.5;cursor:not-allowed" onclick="event.preventDefault()">View</a>
+            ${profileAction}
           </div>
         </div>
       </div>
-    `,
-    )
+    `;
+    })
     .join('');
 
   for (const button of grid.querySelectorAll('button[data-action="connect"]')) {
@@ -95,7 +111,8 @@ function aggregateAll() {
   const bestByUser = new Map();
   for (const ideaId of state.ideas.map((idea) => idea.id)) {
     for (const item of state.buckets.get(ideaId) || []) {
-      const ownerId = item.matched_idea.owner.id;
+      const ownerId = item?.matched_idea?.owner?.id;
+      if (!ownerId) continue;
       const existing = bestByUser.get(ownerId);
       if (!existing || item.final_score > existing.final_score) {
         bestByUser.set(ownerId, item);
@@ -107,9 +124,18 @@ function aggregateAll() {
 
 function sortItems(items) {
   if (state.sort === 'recent') {
-    return items.sort((a, b) => (new Date(b.computed_at || 0) - new Date(a.computed_at || 0)));
+    return items.sort((a, b) => new Date(b.computed_at || 0) - new Date(a.computed_at || 0));
   }
   return items.sort((a, b) => b.final_score - a.final_score);
+}
+
+function renderCurrentSelection() {
+  if (state.selected === 'all') {
+    render(sortItems(aggregateAll()));
+    return;
+  }
+
+  render(sortItems([...(state.buckets.get(state.selected) || [])]));
 }
 
 async function fetchForIdea(ideaId, reset = false) {
@@ -125,17 +151,17 @@ async function fetchForIdea(ideaId, reset = false) {
 
 async function refreshMatches(reset = true) {
   if (state.selected === 'all') {
-    await Promise.all(state.ideas.map((idea) => fetchForIdea(idea.id, reset)));
-    const merged = sortItems(aggregateAll());
-    render(merged);
+    for (const idea of state.ideas) {
+      await fetchForIdea(idea.id, reset);
+    }
+    renderCurrentSelection();
     const hasMore = state.ideas.some((idea) => state.cursors.get(idea.id));
     loadMoreBtn.style.display = hasMore ? 'inline-flex' : 'none';
     return;
   }
 
   await fetchForIdea(state.selected, reset);
-  const items = sortItems([...(state.buckets.get(state.selected) || [])]);
-  render(items);
+  renderCurrentSelection();
   loadMoreBtn.style.display = state.cursors.get(state.selected) ? 'inline-flex' : 'none';
 }
 
@@ -152,14 +178,20 @@ async function init() {
     await refreshMatches(true);
   });
 
-  sortFilter.addEventListener('change', async () => {
+  sortFilter.addEventListener('change', () => {
     state.sort = sortFilter.value;
-    await refreshMatches(false);
+    renderCurrentSelection();
   });
 
   loadMoreBtn.addEventListener('click', async () => {
     await refreshMatches(false);
   });
+
+  if (!state.ideas.length) {
+    render([]);
+    loadMoreBtn.style.display = 'none';
+    return;
+  }
 
   await refreshMatches(true);
 }

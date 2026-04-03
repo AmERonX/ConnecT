@@ -30,6 +30,7 @@ async def _serialize_idea(conn, row: dict[str, Any], requester_id: str) -> dict[
         "is_active": bool(row["is_active"]),
         "freshness": freshness,
         "canonical_text": row.get("canonical_text") if str(row["user_id"]) == requester_id else None,
+        "match_count": int(row.get("match_count") or 0),
         "created_at": row["created_at"].isoformat(),
         "updated_at": row["updated_at"].isoformat(),
     }
@@ -107,10 +108,17 @@ async def list_my_ideas(auth: AuthContext = Depends(get_auth_context)):
         rows = await fetch_dict(
             conn,
             """
-            SELECT *
-            FROM project_ideas
-            WHERE user_id = $1 AND is_active = true
-            ORDER BY created_at DESC
+            SELECT
+                pi.*,
+                COALESCE(mc.match_count, 0)::int AS match_count
+            FROM project_ideas pi
+            LEFT JOIN LATERAL (
+                SELECT COUNT(*)::int AS match_count
+                FROM match_participants mp
+                WHERE mp.idea_id = pi.id
+            ) mc ON true
+            WHERE pi.user_id = $1 AND pi.is_active = true
+            ORDER BY pi.created_at DESC
             """,
             auth.user_id,
         )
