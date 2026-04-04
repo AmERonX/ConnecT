@@ -9,8 +9,8 @@ SELECT cron.schedule(
   '* * * * *',
   $$
   SELECT net.http_post(
-    url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/embedding-worker',
-    headers := '{"Authorization": "Bearer ' || current_setting('supabase.service_role_key') || '"}'::jsonb
+    url := 'https://jkqkalodktcomicypjeb.supabase.co/functions/v1/embedding-worker',
+    headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.settings.service_role_key', true))
   );
   $$
 );
@@ -20,8 +20,8 @@ SELECT cron.schedule(
   '* * * * *',
   $$
   SELECT net.http_post(
-    url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/match-worker',
-    headers := '{"Authorization": "Bearer ' || current_setting('supabase.service_role_key') || '"}'::jsonb
+    url := 'https://jkqkalodktcomicypjeb.supabase.co/functions/v1/match-worker',
+    headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.settings.service_role_key', true))
   );
   $$
 );

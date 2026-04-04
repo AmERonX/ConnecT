@@ -2,23 +2,7 @@ import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
 import { bindTopbarProfile } from '../topbar.js';
-
-function esc(value) {
-  return String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-function safeExternalUrl(value) {
-  const normalized = String(value || '').trim();
-  if (!/^https?:\/\//i.test(normalized)) {
-    return null;
-  }
-  return normalized;
-}
+import { esc, safeExternalUrl, initials } from '../utils.js';
 
 const session = await requireAuth();
 bindSidebar();
@@ -92,7 +76,7 @@ function render(items) {
     grid.innerHTML = items
       .map((item) => {
         const ownerName = item?.matched_idea?.owner?.name || 'Unknown User';
-        const ownerInitial = ownerName.charAt(0).toUpperCase() || 'U';
+        const ownerInitial = initials(ownerName);
         const githubUrl = safeExternalUrl(item?.matched_idea?.owner?.github_url);
 
         const profileAction = githubUrl
@@ -140,7 +124,7 @@ function render(items) {
           button.textContent = 'Sent';
         } catch (error) {
           button.removeAttribute('disabled');
-          alert(error.message || 'Failed to send request.');
+          setSummary(`<span style="color:var(--red)">${esc(error.message || 'Failed to send request.')}</span>`);
         }
       });
     }
@@ -355,11 +339,5 @@ try {
   await init();
 } catch (error) {
   clearPolling();
-  grid.innerHTML = `
-    <div class="empty-state" style="grid-column:1 / -1">
-      <div class="empty-icon">!</div>
-      <div class="empty-title">Unable to load matches</div>
-      <div class="empty-text">${esc(error.message || 'Unknown error')}</div>
-    </div>
-  `;
+  emptyState({ icon: '!', title: 'Unable to load matches', text: esc(error.message || 'Unknown error') });
 }

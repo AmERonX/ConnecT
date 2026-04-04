@@ -2,15 +2,7 @@ import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
 import { bindTopbarProfile } from '../topbar.js';
-
-function initials(name) {
-  return (name || 'U')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('');
-}
+import { initials } from '../utils.js';
 
 function eventLabel(event) {
   if (event.signal === 'connection_sent') return 'Connection request sent';

@@ -3,6 +3,7 @@ import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
 import { bindTopbarProfile } from '../topbar.js';
 import { showConfirmDialog } from '../ui/dialogs.js';
+import { esc, initials, safeExternalUrl } from '../utils.js';
 
 const session = await requireAuth();
 bindSidebar();
@@ -23,32 +24,6 @@ const profileFormError = document.getElementById('profile-form-error');
 const skillFormError = document.getElementById('skill-form-error');
 
 let currentProfile = null;
-
-function esc(value) {
-  return String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-function initials(name) {
-  return (name || 'U')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('');
-}
-
-function safeExternalUrl(value) {
-  const normalized = String(value || '').trim();
-  if (!/^https?:\/\//i.test(normalized)) {
-    return null;
-  }
-  return normalized;
-}
 
 function setProfileField(selector, value) {
   const el = document.querySelector(selector);

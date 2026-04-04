@@ -2,15 +2,7 @@ import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
 import { bindTopbarProfile } from '../topbar.js';
-
-function esc(value) {
-  return String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
+import { esc } from '../utils.js';
 
 function freshnessBadge(freshness) {
   const map = {

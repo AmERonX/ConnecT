@@ -2,18 +2,10 @@ import { requireAuth } from '../auth.js';
 import { apiFetch } from '../api.js';
 import { bindSidebar } from '../sidebar.js';
 import { bindTopbarProfile } from '../topbar.js';
-
-function esc(value) {
-  return String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
+import { esc, initials } from '../utils.js';
 
 function firstLetter(value) {
-  return String(value || 'U').trim().charAt(0).toUpperCase() || 'U';
+  return initials(value).charAt(0) || 'U';
 }
 
 const session = await requireAuth();
@@ -135,6 +127,18 @@ function renderTeams(data) {
     </div>
   `;
 
+  function showTeamsError(message) {
+    let toast = document.getElementById('teams-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'teams-toast';
+      toast.className = 'alert alert-error';
+      toast.style.marginBottom = '14px';
+      container.parentNode.insertBefore(toast, container);
+    }
+    toast.innerHTML = `<span>!</span><span>${esc(message)}</span>`;
+  }
+
   for (const button of container.querySelectorAll('button[data-action="accept"]')) {
     button.addEventListener('click', async () => {
       button.setAttribute('disabled', 'disabled');
@@ -142,7 +146,7 @@ function renderTeams(data) {
         await acceptRequest(button.dataset.matchId);
         await load();
       } catch (error) {
-        alert(error.message || 'Failed to accept request.');
+        showTeamsError(error.message || 'Failed to accept request.');
         button.removeAttribute('disabled');
       }
     });
@@ -155,7 +159,7 @@ function renderTeams(data) {
         await declineRequest(button.dataset.matchId);
         await load();
       } catch (error) {
-        alert(error.message || 'Failed to decline request.');
+        showTeamsError(error.message || 'Failed to decline request.');
         button.removeAttribute('disabled');
       }
     });

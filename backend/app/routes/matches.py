@@ -11,10 +11,6 @@ router = APIRouter(tags=["matches"])
 
 
 def _passes_hard_filters(viewer_idea: dict, candidate_idea: dict, candidate_user: dict) -> bool:
-    viewer_hours = viewer_idea.get("commitment_hrs")
-    candidate_hours = candidate_idea.get("commitment_hrs")
-    if viewer_hours and candidate_hours and abs(viewer_hours - candidate_hours) > 5:
-        return False
     if candidate_user.get("has_existing_team"):
         return False
     return True

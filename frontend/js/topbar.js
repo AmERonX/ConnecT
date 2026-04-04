@@ -1,11 +1,4 @@
-function initials(name) {
-  return String(name || 'U')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('') || 'U';
-}
+import { initials } from './utils.js';
 
 function resolveDisplayName(session, displayName) {
   if (displayName) return displayName;
