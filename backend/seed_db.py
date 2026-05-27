@@ -68,6 +68,50 @@ mock_builders = [
                 "commitment_hrs": 6,
                 "duration_weeks": 2,
                 "commitment_level": "casual"
+            },
+            {
+                "title": "Markdown Slide Generator",
+                "problem": "Presenters spend too much time dragging boxes in PowerPoint when they could write simple markdown slides.",
+                "solution_idea": "A browser-based slideshow creator that compiles Github-flavored markdown into responsive, custom-styled reveal.js slides with visual themes.",
+                "approach": "React frontend with preview pane, serving themes, exporting single-file HTML or PDF.",
+                "tags": ["Markdown", "React", "Presentation"],
+                "required_skills": ["React", "HTML/CSS", "JavaScript"],
+                "commitment_hrs": 6,
+                "duration_weeks": 2,
+                "commitment_level": "casual"
+            },
+            {
+                "title": "Markdown Documentation Hub",
+                "problem": "Development teams lack a unified space to read and search local markdown documentation files with instant live-updates.",
+                "solution_idea": "A self-hosted document viewer that watches a directory of markdown files and hosts a fast, search-indexed documentation site.",
+                "approach": "Node.js file watcher, building an in-memory index for search, and rendering layouts in React.",
+                "tags": ["Developer Tools", "Node.js", "React"],
+                "required_skills": ["Node.js", "React", "PostgreSQL"],
+                "commitment_hrs": 8,
+                "duration_weeks": 3,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "Smart Task Kanbans",
+                "problem": "Trello boards become cluttered and hard to navigate for developers who want automatic links to GitHub issues and pull requests.",
+                "solution_idea": "An interactive Kanban board that automatically syncs and visualizes local developer tasks and GitHub milestones in real-time.",
+                "approach": "Next.js frontend, connecting to the GitHub webhooks API, using PostgreSQL to store local tasks and priorities.",
+                "tags": ["Productivity", "GitHub API", "React"],
+                "required_skills": ["Next.js", "React", "PostgreSQL"],
+                "commitment_hrs": 12,
+                "duration_weeks": 5,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "Peer Coding Sandbox",
+                "problem": "Developers doing technical interviews or paired debugging need a lightweight web editor that supports live remote cursors.",
+                "solution_idea": "A web sandbox with real-time text synchronization and shared terminal execution for quick collaborative debugging.",
+                "approach": "WebSockets for cursor mapping, Monaco Editor for syntax highlighting, and Node.js for backend workspace runners.",
+                "tags": ["Developer Tools", "WebSockets", "React"],
+                "required_skills": ["React", "Node.js", "WebSockets"],
+                "commitment_hrs": 15,
+                "duration_weeks": 6,
+                "commitment_level": "startup_seed"
             }
         ]
     },
@@ -127,6 +171,50 @@ mock_builders = [
                 "commitment_hrs": 8,
                 "duration_weeks": 3,
                 "commitment_level": "casual"
+            },
+            {
+                "title": "AI E-mail Auto-Responder",
+                "problem": "Customer support teams get hundreds of repetitive emails, slowing down response times for complex user queries.",
+                "solution_idea": "An agentic email classifier that reads inbox emails, categorizes them, drafts high-confidence responses, and queues them for human approval.",
+                "approach": "Python daemon using PyTorch for text classification, local LLM integrations, and IMAP/SMTP connections.",
+                "tags": ["AI", "NLP", "Automation"],
+                "required_skills": ["Python", "PyTorch", "NLP"],
+                "commitment_hrs": 12,
+                "duration_weeks": 4,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "Voice Journal Sentiment Analyzer",
+                "problem": "Users logging their thoughts through text find it tedious, while audio recordings lack structured feedback on emotional progression.",
+                "solution_idea": "A web-app that records voice logs, converts audio to text, and charts emotional sentiment indicators over time.",
+                "approach": "Python backend with PyTorch for speech-to-text models and sentiment scoring, with a clean Streamlit interface.",
+                "tags": ["AI", "NLP", "Speech"],
+                "required_skills": ["Python", "PyTorch", "Streamlit"],
+                "commitment_hrs": 10,
+                "duration_weeks": 4,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "Synthetic Dataset Generator",
+                "problem": "Machine learning researchers struggle to train models due to a lack of labeled or public dataset entries.",
+                "solution_idea": "A CLI tool that generates diverse, tabular synthetic datasets based on custom schema instructions and statistical rules.",
+                "approach": "Python command-line utility utilizing Scikit-Learn for distribution modeling, and Numpy/Pandas for bulk data creation.",
+                "tags": ["Data Science", "Python", "Developer Tools"],
+                "required_skills": ["Python", "Scikit-Learn", "CLI"],
+                "commitment_hrs": 6,
+                "duration_weeks": 2,
+                "commitment_level": "casual"
+            },
+            {
+                "title": "Customer Churn Predictor",
+                "problem": "Subscription-based SaaS companies lose clients because they fail to identify customers exhibiting high-risk behavior early.",
+                "solution_idea": "An analytics dashboard that ingests user event logs and uses classification models to predict user churn rates.",
+                "approach": "Python microservice utilizing Scikit-Learn and Pandas to train models, exposing a prediction API for user data.",
+                "tags": ["Machine Learning", "Data Science", "API"],
+                "required_skills": ["Python", "Scikit-Learn", "Pandas"],
+                "commitment_hrs": 15,
+                "duration_weeks": 6,
+                "commitment_level": "startup_seed"
             }
         ]
     },
@@ -186,6 +274,50 @@ mock_builders = [
                 "commitment_hrs": 8,
                 "duration_weeks": 4,
                 "commitment_level": "casual"
+            },
+            {
+                "title": "Micro-Receipts Scanner",
+                "problem": "Budget-conscious spenders lose track of cash receipts because scanning and manual data entry is slow and tedious.",
+                "solution_idea": "A single-tap camera app that parses receipt images locally, extracts prices/merchants, and logs details to a ledger.",
+                "approach": "Swift app using Apple's Vision framework for OCR, storing transaction entries locally via CoreData.",
+                "tags": ["Mobile App", "iOS", "CoreData"],
+                "required_skills": ["Swift", "iOS", "Vision Framework"],
+                "commitment_hrs": 8,
+                "duration_weeks": 3,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "QuickMeet QR Coordinator",
+                "problem": "Exchanging contact cards or social handles at large conferences is awkward and often results in lost connections.",
+                "solution_idea": "An offline-first mobile app that generates custom QRs containing encrypted profile cards and scans them to exchange contacts.",
+                "approach": "Android Kotlin app, using local room database for storage, and native camera APIs for sub-second scanning.",
+                "tags": ["Mobile App", "Android", "Offline Tools"],
+                "required_skills": ["Kotlin", "Android", "Room Database"],
+                "commitment_hrs": 6,
+                "duration_weeks": 2,
+                "commitment_level": "casual"
+            },
+            {
+                "title": "Family Grocery Sync",
+                "problem": "Roommates and families buy duplicate groceries because shopping lists are not dynamically synchronized in real-time.",
+                "solution_idea": "A collaborative grocery list manager where list changes trigger instant push notifications and updates to other members.",
+                "approach": "Flutter mobile application utilizing Firebase Firestore and Cloud Messaging for cross-platform iOS/Android support.",
+                "tags": ["Mobile App", "Cross-Platform", "Firebase"],
+                "required_skills": ["Flutter", "Firebase", "Mobile Development"],
+                "commitment_hrs": 10,
+                "duration_weeks": 4,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "Bluetooth Asset Tracker",
+                "problem": "Pet owners lose track of pets in small indoor yards or apartments where GPS signals are highly inaccurate.",
+                "solution_idea": "A mobile app that connects to low-energy Bluetooth beacon transmitters and charts signal strength to localize lost items.",
+                "approach": "Native iOS app using CoreBluetooth framework, calculating distances using signal indicators, with a dashboard.",
+                "tags": ["Mobile App", "iOS", "Bluetooth"],
+                "required_skills": ["Swift", "iOS", "CoreBluetooth"],
+                "commitment_hrs": 15,
+                "duration_weeks": 8,
+                "commitment_level": "startup_seed"
             }
         ]
     },
@@ -243,6 +375,50 @@ mock_builders = [
                 "tags": ["Education", "Web Development", "CSS"],
                 "required_skills": ["CSS/HTML", "Tailwind CSS", "JavaScript"],
                 "commitment_hrs": 12,
+                "duration_weeks": 4,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "Font Pairing Sandboxes",
+                "problem": "Designers struggle to preview how different font families work together for headings and body copy in digital layouts.",
+                "solution_idea": "A clean web previewer that loads Google Fonts, matches typographic pairings, and lets users download ready-to-use CSS files.",
+                "approach": "Single-page React application, using the Google Web Fonts API, and CSS variables for live previews.",
+                "tags": ["UI/UX", "Typography", "React"],
+                "required_skills": ["JavaScript", "CSS/HTML", "Figma"],
+                "commitment_hrs": 6,
+                "duration_weeks": 2,
+                "commitment_level": "casual"
+            },
+            {
+                "title": "Design Component Spec-Sheets",
+                "problem": "Handovers from designers to developers fail when component specs, spacings, and states are not explicitly documented.",
+                "solution_idea": "A Figma plugin that extracts component tokens and automatically generates clean, organized style sheets with spacing specs.",
+                "approach": "Figma Plugin API, parsing visual nodes, and generating interactive HTML/CSS style guides for developers.",
+                "tags": ["Figma Plugin", "UI/UX", "Developer Tools"],
+                "required_skills": ["Figma", "JavaScript", "CSS/HTML"],
+                "commitment_hrs": 12,
+                "duration_weeks": 5,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "Interactive Flexbox Arena",
+                "problem": "Web developers find CSS Flexbox alignments and direction values confusing to apply in real layouts.",
+                "solution_idea": "A gamified dashboard where users solve layout challenges by adjusting CSS Flexbox variables on visual containers.",
+                "approach": "Client-side web app using Tailwind CSS, structured with HTML/JS, with CSS variables representing live configurations.",
+                "tags": ["Education", "Web Development", "UI/UX"],
+                "required_skills": ["CSS/HTML", "Tailwind CSS", "JavaScript"],
+                "commitment_hrs": 8,
+                "duration_weeks": 3,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "Smart Logo Vectorizer",
+                "problem": "Designers need to rapidly clean and vectorize hand-drawn sketches without opening heavy vector illustration software.",
+                "solution_idea": "A minimalist web portal where you drop a canvas sketch and get back clean, optimized SVG path code.",
+                "approach": "Web editor with custom canvas edge-detection algorithms, utilizing Javascript SVG generation libraries.",
+                "tags": ["Design Tools", "SVG", "JavaScript"],
+                "required_skills": ["JavaScript", "CSS/HTML", "Figma"],
+                "commitment_hrs": 10,
                 "duration_weeks": 4,
                 "commitment_level": "portfolio"
             }
@@ -304,6 +480,50 @@ mock_builders = [
                 "commitment_hrs": 15,
                 "duration_weeks": 6,
                 "commitment_level": "startup_seed"
+            },
+            {
+                "title": "Config Validator CLI",
+                "problem": "Kubernetes and Docker deployments fail in production due to simple indentation errors or missing variables in YAML files.",
+                "solution_idea": "A fast CLI parser in Go that validates config schemas, checks format standards, and reports issues prior to deployment.",
+                "approach": "Command line utility in Go, implementing config parsing logic, with customizable linting rules.",
+                "tags": ["Go", "DevOps", "CLI"],
+                "required_skills": ["Go", "Docker", "Linux Sysadmin"],
+                "commitment_hrs": 6,
+                "duration_weeks": 2,
+                "commitment_level": "casual"
+            },
+            {
+                "title": "Container Resource Optimizer",
+                "problem": "Developers set high CPU/RAM constraints on Docker containers, wasting cloud resources and raising bills.",
+                "solution_idea": "A container monitor that analyzes running container usages and recommends optimal resource allocation profiles.",
+                "approach": "Go agent querying the Docker daemon API, recording statistics in an embedded database, and displaying metrics.",
+                "tags": ["Docker", "Go", "Systems"],
+                "required_skills": ["Go", "Docker", "AWS"],
+                "commitment_hrs": 12,
+                "duration_weeks": 5,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "Static Site Go Server",
+                "problem": "Standard web servers like Nginx are difficult to configure and set up for simple hosting of static portfolios.",
+                "solution_idea": "A single-command static server in Go featuring auto-generated SSL certificates and direct file caching.",
+                "approach": "Native Go HTTP package, integrating Let's Encrypt API for automated certificate renewals, and memory-mapped file cache.",
+                "tags": ["Go", "Systems", "Web Server"],
+                "required_skills": ["Go", "Docker", "Linux Sysadmin"],
+                "commitment_hrs": 10,
+                "duration_weeks": 4,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "AWS S3 Photo Bucket Sync",
+                "problem": "Backing up photos and local media to AWS S3 requires complex CLI scripts or slow, manual browser uploads.",
+                "solution_idea": "A background system daemon that watches a local directory and uploads new assets to S3 folders with image compression.",
+                "approach": "Go background service using file system notify libraries, AWS SDK, and compression utilities.",
+                "tags": ["Go", "AWS", "Storage"],
+                "required_skills": ["Go", "AWS", "Docker"],
+                "commitment_hrs": 8,
+                "duration_weeks": 3,
+                "commitment_level": "casual"
             }
         ]
     },
@@ -360,6 +580,50 @@ mock_builders = [
                 "approach": "Rust service using ethers-rs to watch mempools, predicting fees via regression, and serving predictions over Actix-web.",
                 "tags": ["Rust", "Web3", "API"],
                 "required_skills": ["Rust", "Web3.js", "Web Development"],
+                "commitment_hrs": 8,
+                "duration_weeks": 3,
+                "commitment_level": "casual"
+            },
+            {
+                "title": "ERC-20 Token Streamer",
+                "problem": "Recurring token distributions or employee crypto vesting models require manual tracking and high transaction fees.",
+                "solution_idea": "A smart contract interface allowing employers to stream ERC-20 tokens to addresses continuously per second.",
+                "approach": "Solidity smart contracts managing stream parameters, with a React user dashboard and Web3 integrations.",
+                "tags": ["Solidity", "Web3", "React"],
+                "required_skills": ["Solidity", "Web3.js", "React"],
+                "commitment_hrs": 12,
+                "duration_weeks": 4,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "Solidity Security Scanner",
+                "problem": "Smart contracts contain common re-entrancy and arithmetic bugs that lead to massive fund exploits after deployment.",
+                "solution_idea": "A Rust CLI tool that parses smart contract code, builds abstract syntax trees, and checks for unsafe external calls.",
+                "approach": "Rust parser reading Solidity files, checking patterns against common exploit definitions, and outputting reports.",
+                "tags": ["Rust", "Solidity", "Security"],
+                "required_skills": ["Rust", "Solidity", "SQL"],
+                "commitment_hrs": 15,
+                "duration_weeks": 6,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "Web3 Social Polls",
+                "problem": "Online voting is vulnerable to bot manipulation and doesn't represent actual token-holding project members.",
+                "solution_idea": "A voting platform where poll results are weighted based on the voters' cryptocurrency or NFT balance.",
+                "approach": "React frontend, utilizing Web3.js to verify wallet signatures, and calling contract endpoints to query wallet balances.",
+                "tags": ["Web3", "Solidity", "React"],
+                "required_skills": ["Solidity", "Web3.js", "React"],
+                "commitment_hrs": 10,
+                "duration_weeks": 3,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "NFT Metadata Indexer",
+                "problem": "Querying IPFS metadata endpoints dynamically for thousands of individual NFTs causes high network latencies.",
+                "solution_idea": "A database-backed local indexer that scrapes NFT metadata and exposes a fast GraphQL search endpoint.",
+                "approach": "Rust daemon caching metadata in PostgreSQL, and serving query requests via a graphql backend.",
+                "tags": ["Rust", "Web3", "GraphQL"],
+                "required_skills": ["Rust", "Web3.js", "SQL"],
                 "commitment_hrs": 8,
                 "duration_weeks": 3,
                 "commitment_level": "casual"
@@ -584,7 +848,7 @@ $$;
         new_matches = await conn.fetchval("SELECT discover_new_matches()")
         print(f"Discovered new matches: {new_matches}")
         
-        stale_updated = await conn.fetchval("SELECT update_stale_matches(100)")
+        stale_updated = await conn.fetchval("SELECT update_stale_matches(500)")
         print(f"Scored and updated matches: {stale_updated}")
         
         print("\nSeeding completed successfully!")
