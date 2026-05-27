@@ -552,8 +552,6 @@ DECLARE
   skill_comp_b float;
   avg_skill_comp float;
   
-  level_a text;
-  level_b text;
   v_commit_compat float;
   
   -- Weights
