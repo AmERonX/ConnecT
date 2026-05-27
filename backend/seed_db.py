@@ -24,17 +24,52 @@ mock_builders = [
             {"skill_name": "Node.js", "level": "intermediate"},
             {"skill_name": "PostgreSQL", "level": "intermediate"}
         ],
-        "idea": {
-            "title": "DevPortfolio Builder",
-            "problem": "Developers spend too much time coding custom portfolios instead of working on actual side projects or studies.",
-            "solution_idea": "An interactive command-line and web tool that builds a highly interactive, 3D animated developer portfolio directly from a user's GitHub profile in seconds.",
-            "approach": "Query the GitHub GraphQL API, parse repos and contributions, and feed that data into pre-built Next.js and Three.js dashboard templates.",
-            "tags": ["Web Development", "CLI", "React"],
-            "required_skills": ["Three.js", "Next.js", "GraphQL"],
-            "commitment_hrs": 10,
-            "duration_weeks": 4,
-            "commitment_level": "serious"
-        }
+        "ideas": [
+            {
+                "title": "DevPortfolio Builder",
+                "problem": "Developers spend too much time coding custom portfolios instead of working on actual side projects or studies.",
+                "solution_idea": "An interactive command-line and web tool that builds a highly interactive, 3D animated developer portfolio directly from a user's GitHub profile in seconds.",
+                "approach": "Query the GitHub GraphQL API, parse repos and contributions, and feed that data into pre-built Next.js and Three.js dashboard templates.",
+                "tags": ["Web Development", "CLI", "React"],
+                "required_skills": ["Three.js", "Next.js", "GraphQL"],
+                "commitment_hrs": 10,
+                "duration_weeks": 4,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "EventPlanner Pro",
+                "problem": "Coordinating micro-events, meetups, and schedules across group chats is messy and details get lost in threads.",
+                "solution_idea": "A minimalist shared scheduling application where users can vote on dates, suggest venues, and automatically sync events to their calendar.",
+                "approach": "React frontend with a Node.js Express backend using PostgreSQL for real-time schedule merging.",
+                "tags": ["Web Development", "Productivity", "SQL"],
+                "required_skills": ["React", "Node.js", "PostgreSQL"],
+                "commitment_hrs": 8,
+                "duration_weeks": 3,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "LocalShop Direct",
+                "problem": "Small local grocery shops struggle to display their daily inventory and deals to nearby residents without expensive delivery apps.",
+                "solution_idea": "A hyper-local directory platform where store owners scan receipts or speak items to update inventory in real-time.",
+                "approach": "Next.js frontend, Node.js API with custom OCR processing, and PostgreSQL with PostGIS for spatial radius queries.",
+                "tags": ["E-commerce", "Map", "Web Development"],
+                "required_skills": ["Next.js", "PostgreSQL", "Node.js"],
+                "commitment_hrs": 12,
+                "duration_weeks": 6,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "API Mocking Hub",
+                "problem": "Frontend teams are blocked when backend API endpoints are not yet fully implemented or documented.",
+                "solution_idea": "A collaborative mock API designer where you define JSON schemas and get instant mock endpoints with custom response latency.",
+                "approach": "React dashboard for editing schemas, dynamic Node.js middleware for running mock endpoints, and PostgreSQL for storage.",
+                "tags": ["Developer Tools", "React", "Node.js"],
+                "required_skills": ["React", "Node.js", "PostgreSQL"],
+                "commitment_hrs": 6,
+                "duration_weeks": 2,
+                "commitment_level": "casual"
+            }
+        ]
     },
     {
         "name": "Priya Patel",
@@ -48,17 +83,52 @@ mock_builders = [
             {"skill_name": "PyTorch", "level": "intermediate"},
             {"skill_name": "Scikit-Learn", "level": "advanced"}
         ],
-        "idea": {
-            "title": "MentalHealth MoodTracker",
-            "problem": "Mental health conditions and burnout are often diagnosed late because individuals don't track subtle changes in mood or behaviour.",
-            "solution_idea": "A privacy-first mobile application that uses local, on-device audio classification and diary text analysis to detect early signs of burnout.",
-            "approach": "Build a Flutter application, implement local ONNX-runtime ML models for audio tone analysis, and use local database storage to ensure user privacy.",
-            "tags": ["Mobile App", "Machine Learning", "NLP"],
-            "required_skills": ["Flutter", "ONNX", "Mobile Development"],
-            "commitment_hrs": 15,
-            "duration_weeks": 8,
-            "commitment_level": "startup_seed"
-        }
+        "ideas": [
+            {
+                "title": "MentalHealth MoodTracker",
+                "problem": "Mental health conditions and burnout are often diagnosed late because individuals don't track subtle changes in mood or behaviour.",
+                "solution_idea": "A privacy-first mobile application that uses local, on-device audio classification and diary text analysis to detect early signs of burnout.",
+                "approach": "Build a Flutter application, implement local ONNX-runtime ML models for audio tone analysis, and use local database storage to ensure user privacy.",
+                "tags": ["Mobile App", "Machine Learning", "NLP"],
+                "required_skills": ["Flutter", "ONNX", "Mobile Development"],
+                "commitment_hrs": 15,
+                "duration_weeks": 8,
+                "commitment_level": "startup_seed"
+            },
+            {
+                "title": "CodeReview Helper",
+                "problem": "Pull request reviews take a lot of time, and basic syntax or styling comments clutter developer discussions.",
+                "solution_idea": "An automated code reviewer that reads PR diffs, highlights potential bugs/refactoring opportunities, and suggests fixes inline.",
+                "approach": "Python backend with PyTorch for code model execution, GitHub API webhook integration, and SQLite for lightweight tracking.",
+                "tags": ["AI", "Developer Tools", "NLP"],
+                "required_skills": ["Python", "PyTorch", "GitHub API"],
+                "commitment_hrs": 10,
+                "duration_weeks": 4,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "LegalDoc Summarizer",
+                "problem": "Standard users sign complex terms of service agreements and legal contracts without understanding the hidden risks and clauses.",
+                "solution_idea": "A browser extension that analyzes legal agreements in real-time, highlighting hidden fees, arbitration clauses, and privacy details.",
+                "approach": "A Python FastAPI microservice utilizing PyTorch transformers, and a chrome browser extension using HTML/JS for document parsing.",
+                "tags": ["NLP", "AI", "Chrome Extension"],
+                "required_skills": ["Python", "PyTorch", "JavaScript"],
+                "commitment_hrs": 12,
+                "duration_weeks": 5,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "Smart Crop Disease Detector",
+                "problem": "Small-scale farmers lack access to agricultural experts to identify plant diseases quickly, leading to crop loss.",
+                "solution_idea": "A lightweight web application where farmers upload plant photos to get an instant disease diagnosis and recommended treatment.",
+                "approach": "Streamlit app in Python, utilizing a fine-tuned PyTorch ResNet model for plant disease image classification.",
+                "tags": ["Computer Vision", "AI", "Agriculture"],
+                "required_skills": ["Python", "PyTorch", "Streamlit"],
+                "commitment_hrs": 8,
+                "duration_weeks": 3,
+                "commitment_level": "casual"
+            }
+        ]
     },
     {
         "name": "Vikram Singh",
@@ -72,17 +142,52 @@ mock_builders = [
             {"skill_name": "Kotlin", "level": "intermediate"},
             {"skill_name": "Firebase", "level": "intermediate"}
         ],
-        "idea": {
-            "title": "CampusFood Runner",
-            "problem": "Long cafeteria lines on university campuses cause students to miss meals or arrive late to lectures.",
-            "solution_idea": "A crowd-sourced food delivery app for university campuses where students order food and peer runners deliver it for small fees.",
-            "approach": "Native iOS app with Swift, real-time Firestore database for location tracking, and Stripe integration for quick payments.",
-            "tags": ["Mobile App", "iOS", "Firebase"],
-            "required_skills": ["Swift", "Firebase", "iOS"],
-            "commitment_hrs": 5,
-            "duration_weeks": 6,
-            "commitment_level": "casual"
-        }
+        "ideas": [
+            {
+                "title": "CampusFood Runner",
+                "problem": "Long cafeteria lines on university campuses cause students to miss meals or arrive late to lectures.",
+                "solution_idea": "A crowd-sourced food delivery app for university campuses where students order food and peer runners deliver it for small fees.",
+                "approach": "Native iOS app with Swift, real-time Firestore database for location tracking, and Stripe integration for quick payments.",
+                "tags": ["Mobile App", "iOS", "Firebase"],
+                "required_skills": ["Swift", "Firebase", "iOS"],
+                "commitment_hrs": 5,
+                "duration_weeks": 6,
+                "commitment_level": "casual"
+            },
+            {
+                "title": "WorkoutBuddy Sync",
+                "problem": "People struggle to stay motivated with fitness routines unless they are exercising with friends, but scheduling workouts is difficult.",
+                "solution_idea": "A workout-sharing mobile app where friends can view each other's active workouts, send micro-cheers, and sync schedules.",
+                "approach": "Native Kotlin app for Android, using Firebase Firestore for live synchronization, and Google Fit API for step/calorie syncing.",
+                "tags": ["Mobile App", "Android", "Fitness"],
+                "required_skills": ["Kotlin", "Firebase", "Android"],
+                "commitment_hrs": 10,
+                "duration_weeks": 4,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "Off-Grid Hiker Maps",
+                "problem": "Mountain hikers often lose GPS and mobile signal, rendering standard mapping and emergency communication applications useless.",
+                "solution_idea": "A mobile app offering offline topographical map caching, waypoint tracking, and mesh-network sharing with nearby hikers.",
+                "approach": "Native Swift app for iOS, CoreLocation API, local cache via SQLite, and multi-peer connectivity framework for mesh sharing.",
+                "tags": ["Mobile App", "iOS", "Offline Tools"],
+                "required_skills": ["Swift", "iOS", "CoreLocation"],
+                "commitment_hrs": 15,
+                "duration_weeks": 8,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "RemoteDesk Manager",
+                "problem": "Remote workers struggle to keep track of physical inventory (laptops, monitors, chairs) supplied to them by different employers.",
+                "solution_idea": "A sleek mobile application for company inventory audits, allowing employees to scan asset barcodes and update status.",
+                "approach": "Multiplatform app with Kotlin Multiplatform, Firebase Auth, and Firebase Cloud Functions for admin inventory summaries.",
+                "tags": ["Mobile App", "Productivity", "Enterprise"],
+                "required_skills": ["Kotlin", "Firebase", "Kotlin Multiplatform"],
+                "commitment_hrs": 8,
+                "duration_weeks": 4,
+                "commitment_level": "casual"
+            }
+        ]
     },
     {
         "name": "Nisha Gupta",
@@ -96,17 +201,52 @@ mock_builders = [
             {"skill_name": "CSS/HTML", "level": "advanced"},
             {"skill_name": "Tailwind CSS", "level": "advanced"}
         ],
-        "idea": {
-            "title": "NoCode WebAnimation Builder",
-            "problem": "Creative UI/UX designers cannot easily add advanced canvas or SVG animations to their webs without coding complex JavaScript.",
-            "solution_idea": "A visual drag-and-drop web editor that generates clean, optimized GSAP (GreenSock) and SVG animation code.",
-            "approach": "Build a responsive web application using Tailwind, Vanilla CSS, GSAP integration, and HTML5 canvas exporting utilities.",
-            "tags": ["UI/UX", "Design Tools", "GSAP"],
-            "required_skills": ["JavaScript", "GSAP", "Figma"],
-            "commitment_hrs": 8,
-            "duration_weeks": 4,
-            "commitment_level": "portfolio"
-        }
+        "ideas": [
+            {
+                "title": "NoCode WebAnimation Builder",
+                "problem": "Creative UI/UX designers cannot easily add advanced canvas or SVG animations to their webs without coding complex JavaScript.",
+                "solution_idea": "A visual drag-and-drop web editor that generates clean, optimized GSAP (GreenSock) and SVG animation code.",
+                "approach": "Build a responsive web application using Tailwind, Vanilla CSS, GSAP integration, and HTML5 canvas exporting utilities.",
+                "tags": ["UI/UX", "Design Tools", "GSAP"],
+                "required_skills": ["JavaScript", "GSAP", "Figma"],
+                "commitment_hrs": 8,
+                "duration_weeks": 4,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "Designer Feedbacks Hub",
+                "problem": "Collecting and sorting through client visual feedback on design mockups across emails, Slack, and PDFs is slow and chaotic.",
+                "solution_idea": "A clean feedback dashboard where clients pin comment bubbles directly on uploaded Figma frames or image files.",
+                "approach": "Custom web platform built with HTML/CSS, Tailwind CSS for frontend layouts, and dynamic Canvas-based overlay tracking.",
+                "tags": ["UI/UX", "Design Tools", "Web Development"],
+                "required_skills": ["Figma", "Tailwind CSS", "CSS/HTML"],
+                "commitment_hrs": 10,
+                "duration_weeks": 5,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "Gradient&Palette Generator",
+                "problem": "Designers need high-contrast, accessible color palettes that automatically comply with WCAG accessibility guidelines.",
+                "solution_idea": "A beautiful, keyboard-driven web application that suggests color palettes and simulates different color-blindness conditions.",
+                "approach": "Single-page application using Tailwind CSS, vanilla JavaScript for accessibility math, and Figma API integration for exporting.",
+                "tags": ["UI/UX", "Accessibility", "Design Tools"],
+                "required_skills": ["CSS/HTML", "Tailwind CSS", "Figma"],
+                "commitment_hrs": 5,
+                "duration_weeks": 2,
+                "commitment_level": "casual"
+            },
+            {
+                "title": "CSS Grid Playgrounds",
+                "problem": "Beginners find the complexities of CSS Grid layouts and auto-placement rules highly intimidating to learn.",
+                "solution_idea": "An interactive game and visual sandbox where users solve puzzles by arranging grids and exporting copy-paste CSS code.",
+                "approach": "Interactive web application constructed with HTML5, CSS Grid, and custom animations showing grid lines in real-time.",
+                "tags": ["Education", "Web Development", "CSS"],
+                "required_skills": ["CSS/HTML", "Tailwind CSS", "JavaScript"],
+                "commitment_hrs": 12,
+                "duration_weeks": 4,
+                "commitment_level": "portfolio"
+            }
+        ]
     },
     {
         "name": "Rohan Das",
@@ -120,17 +260,52 @@ mock_builders = [
             {"skill_name": "Docker", "level": "advanced"},
             {"skill_name": "AWS", "level": "intermediate"}
         ],
-        "idea": {
-            "title": "Serverless Event Bus",
-            "problem": "Existing cloud message queues (like AWS SQS) are difficult to run and test locally, causing slow developer feedback loops.",
-            "solution_idea": "A local-first, containerized event bus with a sleek web UI, mimicking SNS/SQS but with zero latency.",
-            "approach": "Write the event core in Go, package with Docker, and construct a lightweight React web console for visual logs.",
-            "tags": ["DevOps", "Go", "Infrastructure"],
-            "required_skills": ["Go", "Docker", "React"],
-            "commitment_hrs": 12,
-            "duration_weeks": 5,
-            "commitment_level": "serious"
-        }
+        "ideas": [
+            {
+                "title": "Serverless Event Bus",
+                "problem": "Existing cloud message queues (like AWS SQS) are difficult to run and test locally, causing slow developer feedback loops.",
+                "solution_idea": "A local-first, containerized event bus with a sleek web UI, mimicking SNS/SQS but with zero latency.",
+                "approach": "Write the event core in Go, package with Docker, and construct a lightweight React web console for visual logs.",
+                "tags": ["DevOps", "Go", "Infrastructure"],
+                "required_skills": ["Go", "Docker", "React"],
+                "commitment_hrs": 12,
+                "duration_weeks": 5,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "LogAggregator Tiny",
+                "problem": "Enterprise log aggregates are bulky, resource-intensive, and hard to deploy for small server clusters or hobby apps.",
+                "solution_idea": "A single-binary log shipper and parser in Go that consumes less than 15MB RAM and has a simple web viewer.",
+                "approach": "Write log routing and processing in Go, use SQLite for indexing, and embed a minimal HTML dashboard in the binary.",
+                "tags": ["Go", "DevOps", "Systems"],
+                "required_skills": ["Go", "Docker", "Linux Sysadmin"],
+                "commitment_hrs": 10,
+                "duration_weeks": 4,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "AWS Cost Watcher",
+                "problem": "Small startups accidentally incur massive AWS bills due to orphan EBS volumes, inactive NAT gateways, and oversized DBs.",
+                "solution_idea": "An open-source scheduler that runs hourly checks, estimates costs, and sends Discord alerts for any abnormal spending.",
+                "approach": "Go CLI tool using the AWS SDK, packaged into a lightweight Docker image for quick deployment.",
+                "tags": ["Cloud Cost", "Go", "AWS"],
+                "required_skills": ["Go", "AWS", "Docker"],
+                "commitment_hrs": 6,
+                "duration_weeks": 3,
+                "commitment_level": "casual"
+            },
+            {
+                "title": "Microservice Health Dashboard",
+                "problem": "Developers need a unified health-check dashboard for distributed microservices without paying for heavy APM software.",
+                "solution_idea": "A self-hosted status page that polls REST, gRPC, and database endpoints, checking response status and latency.",
+                "approach": "Go polling daemon, configured with YAML files, supporting Docker deployments, and displaying status in a clean Web UI.",
+                "tags": ["DevOps", "Go", "Monitoring"],
+                "required_skills": ["Go", "Docker", "AWS"],
+                "commitment_hrs": 15,
+                "duration_weeks": 6,
+                "commitment_level": "startup_seed"
+            }
+        ]
     },
     {
         "name": "Ananya Iyer",
@@ -144,17 +319,52 @@ mock_builders = [
             {"skill_name": "Rust", "level": "intermediate"},
             {"skill_name": "Web3.js", "level": "intermediate"}
         ],
-        "idea": {
-            "title": "Decentralized Escrow",
-            "problem": "Freelancers are frequently scammed or experience delayed payments from clients they meet online.",
-            "solution_idea": "A smart-contract based escrow platform that locks project funds and resolves disputes via a peer-jury system.",
-            "approach": "Solidity smart contracts on EVM chains, a Rust backend for Oracle network integration, and a React frontend.",
-            "tags": ["Web3", "Solidity", "Rust"],
-            "required_skills": ["Solidity", "Rust", "Web3.js"],
-            "commitment_hrs": 16,
-            "duration_weeks": 8,
-            "commitment_level": "startup_seed"
-        }
+        "ideas": [
+            {
+                "title": "Decentralized Escrow",
+                "problem": "Freelancers are frequently scammed or experience delayed payments from clients they meet online.",
+                "solution_idea": "A smart-contract based escrow platform that locks project funds and resolves disputes via a peer-jury system.",
+                "approach": "Solidity smart contracts on EVM chains, a Rust backend for Oracle network integration, and a React frontend.",
+                "tags": ["Web3", "Solidity", "Rust"],
+                "required_skills": ["Solidity", "Rust", "Web3.js"],
+                "commitment_hrs": 16,
+                "duration_weeks": 8,
+                "commitment_level": "startup_seed"
+            },
+            {
+                "title": "Web3 File Lockers",
+                "problem": "Sharing confidential documentation securely with clients is difficult, and centralized lockers control access.",
+                "solution_idea": "A decentralized document sharing tool where file permissions are managed by ownership of specific NFTs.",
+                "approach": "Solidity smart contracts for access control rules, IPFS for encrypted file storage, and Web3.js for browser connections.",
+                "tags": ["Web3", "Solidity", "Security"],
+                "required_skills": ["Solidity", "Web3.js", "React"],
+                "commitment_hrs": 12,
+                "duration_weeks": 4,
+                "commitment_level": "serious"
+            },
+            {
+                "title": "Rust EVM Indexers",
+                "problem": "Fetching historical smart contract event logs directly from Ethereum nodes is extremely slow and hard to query.",
+                "solution_idea": "A high-performance blockchain event indexer written in Rust that streams logs into a local database in seconds.",
+                "approach": "Multi-threaded Rust backend querying RPC nodes, parsing Solidity event ABI, and writing to an optimized database.",
+                "tags": ["Rust", "Web3", "Data Engine"],
+                "required_skills": ["Rust", "Solidity", "SQL"],
+                "commitment_hrs": 15,
+                "duration_weeks": 6,
+                "commitment_level": "portfolio"
+            },
+            {
+                "title": "Gas Estimator API",
+                "problem": "Web3 users face high transaction failures or pay too much gas because default wallet fee suggestions are slow to react.",
+                "solution_idea": "A sub-second gas fee estimator API that reads block transactions and suggests optimal priorities for instant inclusion.",
+                "approach": "Rust service using ethers-rs to watch mempools, predicting fees via regression, and serving predictions over Actix-web.",
+                "tags": ["Rust", "Web3", "API"],
+                "required_skills": ["Rust", "Web3.js", "Web Development"],
+                "commitment_hrs": 8,
+                "duration_weeks": 3,
+                "commitment_level": "casual"
+            }
+        ]
     }
 ]
 
@@ -343,31 +553,31 @@ $$;
                     user_id, skill["skill_name"], skill["level"]
                 )
                 
-            # Insert Project Idea
-            idea_id = uuid.uuid4()
-            idea = b["idea"]
-            
-            # Build canonical text
-            canonical_text = f"Project: {idea['title']}. Problem: {idea['problem']} Solution: {idea['solution_idea']} Approach: {idea['approach']}"
-            
-            await conn.execute(
-                """
-                INSERT INTO project_ideas (id, user_id, problem, solution_idea, approach, tags, commitment_hrs, duration_weeks, is_active, canonical_text, embedding_stale, commitment_level, required_skills)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, $9, true, $10, $11)
-                """,
-                idea_id, user_id, idea["problem"], idea["solution_idea"], idea["approach"], idea["tags"], idea["commitment_hrs"], idea["duration_weeks"], canonical_text, idea["commitment_level"], idea["required_skills"]
-            )
-            
-            # Fetch embedding from Cohere
-            embedding = await generate_embedding(canonical_text)
-            
-            # Call process_embedding to store the embedding
-            embedding_str = f"[{','.join(map(str, embedding))}]"
-            await conn.execute(
-                f"SELECT process_embedding($1, '{embedding_str}'::vector, 'embed-english-v3.0')",
-                idea_id
-            )
-            print(f"Seeded embedding for: {idea['title']}")
+            # Insert Project Ideas
+            for idea in b["ideas"]:
+                idea_id = uuid.uuid4()
+                
+                # Build canonical text
+                canonical_text = f"Project: {idea['title']}. Problem: {idea['problem']} Solution: {idea['solution_idea']} Approach: {idea['approach']}"
+                
+                await conn.execute(
+                    """
+                    INSERT INTO project_ideas (id, user_id, problem, solution_idea, approach, tags, commitment_hrs, duration_weeks, is_active, canonical_text, embedding_stale, commitment_level, required_skills)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, $9, true, $10, $11)
+                    """,
+                    idea_id, user_id, idea["problem"], idea["solution_idea"], idea["approach"], idea["tags"], idea["commitment_hrs"], idea["duration_weeks"], canonical_text, idea["commitment_level"], idea["required_skills"]
+                )
+                
+                # Fetch embedding from Cohere
+                embedding = await generate_embedding(canonical_text)
+                
+                # Call process_embedding to store the embedding
+                embedding_str = f"[{','.join(map(str, embedding))}]"
+                await conn.execute(
+                    f"SELECT process_embedding($1, '{embedding_str}'::vector, 'embed-english-v3.0')",
+                    idea_id
+                )
+                print(f"Seeded embedding for: {idea['title']}")
 
         # Trigger matching pipeline functions in DB
         print("\nRunning matching engine pipeline in the database...")
