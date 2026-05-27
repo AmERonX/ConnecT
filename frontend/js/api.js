@@ -1,4 +1,4 @@
-import { getAccessToken } from './auth.js?v=1779876340960';
+import { getAccessToken } from './auth.js';
 
 const API_BASE = (window.CONNECT_API_BASE || 'http://localhost:8000').replace(/\/+$/, '');
 

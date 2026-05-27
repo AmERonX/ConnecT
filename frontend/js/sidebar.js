@@ -1,4 +1,4 @@
-import { logout } from './auth.js?v=1779876340960';
+import { logout } from './auth.js';
 
 export function bindSidebar() {
   const sidebar = document.getElementById('sidebar');

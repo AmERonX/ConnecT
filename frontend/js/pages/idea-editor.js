@@ -1,9 +1,9 @@
-import { requireAuth } from '../auth.js?v=1779876340960';
-import { apiFetch, ApiError } from '../api.js?v=1779876340960';
-import { bindSidebar } from '../sidebar.js?v=1779876340960';
-import { bindTopbarProfile } from '../topbar.js?v=1779876340960';
-import { showConfirmDialog } from '../ui/dialogs.js?v=1779876340960';
-import { initTagInput } from '../tags.js?v=1779876340960';
+import { requireAuth } from '../auth.js';
+import { apiFetch, ApiError } from '../api.js';
+import { bindSidebar } from '../sidebar.js';
+import { bindTopbarProfile } from '../topbar.js';
+import { showConfirmDialog } from '../ui/dialogs.js';
+import { initTagInput } from '../tags.js';
 
 const session = await requireAuth();
 bindSidebar();

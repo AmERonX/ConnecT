@@ -1,8 +1,8 @@
-import { requireAuth } from '../auth.js?v=1779876340960';
-import { apiFetch } from '../api.js?v=1779876340960';
-import { bindSidebar } from '../sidebar.js?v=1779876340960';
-import { bindTopbarProfile } from '../topbar.js?v=1779876340960';
-import { initials } from '../utils.js?v=1779876340960';
+import { requireAuth } from '../auth.js';
+import { apiFetch } from '../api.js';
+import { bindSidebar } from '../sidebar.js';
+import { bindTopbarProfile } from '../topbar.js';
+import { initials } from '../utils.js';
 
 function eventLabel(event) {
   if (event.signal === 'connection_sent') return 'Connection request sent';
