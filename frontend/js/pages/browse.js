@@ -1,8 +1,8 @@
-import { requireAuth } from '../auth.js';
-import { apiFetch } from '../api.js';
-import { bindSidebar } from '../sidebar.js';
-import { bindTopbarProfile } from '../topbar.js';
-import { esc, safeExternalUrl, initials } from '../utils.js';
+import { requireAuth } from '../auth.js?v=1779876340960';
+import { apiFetch } from '../api.js?v=1779876340960';
+import { bindSidebar } from '../sidebar.js?v=1779876340960';
+import { bindTopbarProfile } from '../topbar.js?v=1779876340960';
+import { esc, safeExternalUrl, initials } from '../utils.js?v=1779876340960';
 
 const session = await requireAuth();
 bindSidebar();

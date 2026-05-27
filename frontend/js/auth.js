@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from './supabase.js';
+import { supabase, isSupabaseConfigured } from './supabase.js?v=1779876340960';
 
 function assertConfigured() {
   if (!isSupabaseConfigured) {

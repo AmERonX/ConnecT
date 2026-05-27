@@ -1,4 +1,4 @@
-import { signup, loginWithGoogle, redirectIfAuthenticated } from '../auth.js';
+import { signup, loginWithGoogle, redirectIfAuthenticated } from '../auth.js?v=1779876340960';
 
 const form = document.getElementById('signup-form');
 const submitBtn = document.getElementById('submit-btn');

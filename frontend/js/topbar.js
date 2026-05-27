@@ -1,4 +1,4 @@
-import { initials } from './utils.js';
+import { initials } from './utils.js?v=1779876340960';
 
 function resolveDisplayName(session, displayName) {
   if (displayName) return displayName;
