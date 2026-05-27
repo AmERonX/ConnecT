@@ -19,22 +19,28 @@ class CanonicalizeRequest(BaseModel):
 
 
 class IdeaCreateRequest(BaseModel):
+    title: Optional[str] = None
     problem: str
     solution_idea: Optional[str] = None
     approach: Optional[str] = None
     tags: Optional[list[str]] = None
     commitment_hrs: Optional[int] = None
     duration_weeks: Optional[int] = None
+    commitment_level: Optional[str] = None
+    required_skills: Optional[list[str]] = None
     canonical_text: str
 
 
 class IdeaUpdateRequest(BaseModel):
+    title: Optional[str] = None
     problem: Optional[str] = None
     solution_idea: Optional[str] = None
     approach: Optional[str] = None
     tags: Optional[list[str]] = None
     commitment_hrs: Optional[int] = None
     duration_weeks: Optional[int] = None
+    commitment_level: Optional[str] = None
+    required_skills: Optional[list[str]] = None
     is_active: Optional[bool] = None
     canonical_text: Optional[str] = None
 
@@ -42,12 +48,15 @@ class IdeaUpdateRequest(BaseModel):
 class IdeaResponse(BaseModel):
     id: str
     user_id: str
+    title: Optional[str] = None
     problem: str
     solution_idea: Optional[str] = None
     approach: Optional[str] = None
     tags: Optional[list[str]] = None
     commitment_hrs: Optional[int] = None
     duration_weeks: Optional[int] = None
+    commitment_level: Optional[str] = None
+    required_skills: Optional[list[str]] = None
     is_active: bool
     freshness: str
     canonical_text: Optional[str] = None

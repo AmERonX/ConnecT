@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app.auth import AuthContext, get_auth_context
 from app.db import db, fetch_dict, fetchrow_dict
 from app.errors import AppError
-from app.models.team import TeamCreateRequest
+from app.models.team import TeamCreateRequest, TeamUpdateRequest
 from app.responses import success_response
 
 router = APIRouter(tags=["teams"])
@@ -34,12 +34,29 @@ async def _team_with_members(conn, team_id: str) -> dict:
         team_id,
     )
 
+    idea = await fetchrow_dict(
+        conn,
+        """
+        SELECT id, title, problem, solution_idea
+        FROM project_ideas
+        WHERE team_id = $1 AND is_active = true
+        LIMIT 1
+        """,
+        team_id,
+    )
+
     return {
         "id": str(team["id"]),
         "name": team.get("name"),
         "formed_at": team["formed_at"].isoformat(),
         "completed": bool(team["completed"]),
         "members": [{"id": str(member["id"]), "name": member["name"]} for member in members],
+        "idea": {
+            "id": str(idea["id"]),
+            "title": idea["title"],
+            "problem": idea["problem"],
+            "solution_idea": idea["solution_idea"],
+        } if idea else None
     }
 
 
@@ -49,7 +66,7 @@ async def create_team(body: TeamCreateRequest, auth: AuthContext = Depends(get_a
         participants = await fetch_dict(
             conn,
             """
-            SELECT pi.user_id
+            SELECT pi.id, pi.user_id, pi.team_id
             FROM match_participants mp
             JOIN project_ideas pi ON pi.id = mp.idea_id
             WHERE mp.match_id = $1
@@ -78,26 +95,93 @@ async def create_team(body: TeamCreateRequest, auth: AuthContext = Depends(get_a
         if auth.user_id not in user_ids:
             raise AppError(code="FORBIDDEN", message="You are not a participant in this match.", status_code=403)
 
-        async with conn.transaction():
-            team_row = await fetchrow_dict(
-                conn,
-                """
-                INSERT INTO teams (name)
-                VALUES ($1)
-                RETURNING id
-                """,
-                body.name,
-            )
+        sender_feedback = await fetchrow_dict(
+            conn,
+            """
+            SELECT actor_user_id
+            FROM match_feedback
+            WHERE match_id = $1 AND signal = 'connection_sent'
+            ORDER BY created_at ASC
+            LIMIT 1
+            """,
+            body.match_id
+        )
+        if not sender_feedback:
+            raise AppError(code="CONFLICT", message="No connection request found for this match.", status_code=409)
 
-            for user_id in user_ids:
+        sender_user_id = str(sender_feedback["actor_user_id"])
+        
+        sender_idea = next((p for p in participants if str(p["user_id"]) == sender_user_id), None)
+        receiver_idea = next((p for p in participants if str(p["user_id"]) != sender_user_id), None)
+
+        if not sender_idea or not receiver_idea:
+            raise AppError(code="NOT_FOUND", message="Could not identify sender and receiver ideas.", status_code=404)
+
+        team_idea = next((p for p in participants if p["team_id"] is not None), None)
+
+        async with conn.transaction():
+            if team_idea:
+                team_id = team_idea["team_id"]
+                new_user_idea = receiver_idea if team_idea["id"] == sender_idea["id"] else sender_idea
+                
                 await conn.execute(
                     """
                     INSERT INTO team_members (team_id, user_id)
                     VALUES ($1, $2)
                     ON CONFLICT DO NOTHING
                     """,
+                    team_id,
+                    new_user_idea["user_id"],
+                )
+                
+                await conn.execute(
+                    """
+                    UPDATE project_ideas
+                    SET is_active = false
+                    WHERE id = $1
+                    """,
+                    new_user_idea["id"],
+                )
+                team_row = {"id": team_id}
+            else:
+                team_row = await fetchrow_dict(
+                    conn,
+                    """
+                    INSERT INTO teams (name)
+                    VALUES ($1)
+                    RETURNING id
+                    """,
+                    body.name,
+                )
+
+                for user_id in user_ids:
+                    await conn.execute(
+                        """
+                        INSERT INTO team_members (team_id, user_id)
+                        VALUES ($1, $2)
+                        ON CONFLICT DO NOTHING
+                        """,
+                        team_row["id"],
+                        user_id,
+                    )
+                
+                await conn.execute(
+                    """
+                    UPDATE project_ideas
+                    SET team_id = $1
+                    WHERE id = $2
+                    """,
                     team_row["id"],
-                    user_id,
+                    sender_idea["id"],
+                )
+
+                await conn.execute(
+                    """
+                    UPDATE project_ideas
+                    SET is_active = false
+                    WHERE id = $1
+                    """,
+                    receiver_idea["id"],
                 )
 
     async with db.connection(auth.user_id) as conn:
@@ -253,6 +337,42 @@ async def get_team(team_id: str, auth: AuthContext = Depends(get_auth_context)):
             if exists:
                 raise AppError(code="FORBIDDEN", message="You are not a member of this team.", status_code=403)
             raise AppError(code="NOT_FOUND", message="Team not found.", status_code=404)
+
+        team = await _team_with_members(conn, team_id)
+
+    return success_response(team)
+
+
+@router.patch("/teams/{team_id}")
+async def update_team(team_id: str, body: TeamUpdateRequest, auth: AuthContext = Depends(get_auth_context)):
+    async with db.connection(auth.user_id) as conn:
+        membership = await fetchrow_dict(
+            conn,
+            """
+            SELECT 1 AS ok
+            FROM team_members
+            WHERE team_id = $1 AND user_id = $2
+            """,
+            team_id,
+            auth.user_id,
+        )
+
+        if not membership:
+            exists = await fetchrow_dict(conn, "SELECT id FROM teams WHERE id = $1", team_id)
+            if exists:
+                raise AppError(code="FORBIDDEN", message="You are not a member of this team.", status_code=403)
+            raise AppError(code="NOT_FOUND", message="Team not found.", status_code=404)
+
+        if body.name is not None:
+            await conn.execute(
+                """
+                UPDATE teams
+                SET name = $1
+                WHERE id = $2
+                """,
+                body.name,
+                team_id,
+            )
 
         team = await _team_with_members(conn, team_id)
 

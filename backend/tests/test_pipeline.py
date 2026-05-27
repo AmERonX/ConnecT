@@ -21,6 +21,9 @@ class FakeConn:
 
         return _tx()
 
+    async def execute(self, query, *args):
+        return None
+
 
 def _idea_row(**overrides):
     now = datetime.now(timezone.utc)
@@ -33,9 +36,13 @@ def _idea_row(**overrides):
         "tags": ["ai"],
         "commitment_hrs": 10,
         "duration_weeks": 8,
+        "commitment_level": None,
+        "required_skills": [],
         "is_active": True,
         "canonical_text": "Canonical summary",
         "match_count": 0,
+        "refresh_count": 1,
+        "last_refresh_window": now,
         "created_at": now,
         "updated_at": now,
     }
@@ -94,13 +101,13 @@ def test_create_idea_enqueues_pipeline(monkeypatch):
 
     async def fake_fetchrow_dict(_conn, _query, *args):
         return _idea_row(
-            problem=args[1],
-            solution_idea=args[2],
-            approach=args[3],
-            tags=args[4],
-            commitment_hrs=args[5],
-            duration_weeks=args[6],
-            canonical_text=args[7],
+            problem=args[2],       # $3 — problem (title is $2)
+            solution_idea=args[3],
+            approach=args[4],
+            tags=args[5],
+            commitment_hrs=args[6],
+            duration_weeks=args[7],
+            canonical_text=args[10],
         )
 
     async def fake_compute_freshness(_conn, _row):
@@ -177,6 +184,46 @@ def test_patch_idea_enqueues_pipeline_only_for_intent_changes(monkeypatch):
 
 
 def test_patch_idea_skips_pipeline_for_non_intent_changes(monkeypatch):
+    """Non-intent fields that DON'T affect scoring (e.g. duration_weeks) skip the pipeline."""
+    row_existing = _idea_row(duration_weeks=4)
+    row_updated = _idea_row(duration_weeks=8)
+
+    @asynccontextmanager
+    async def fake_connection(_user_id):
+        yield FakeConn()
+
+    rows = iter([row_existing, row_updated])
+    scheduled = []
+
+    async def fake_fetchrow_dict(_conn, _query, *args):
+        return next(rows)
+
+    async def fake_compute_freshness(_conn, _row):
+        return "fresh"
+
+    def fake_enqueue(background_tasks):
+        scheduled.append(background_tasks)
+
+    monkeypatch.setattr(ideas_route.db, "connection", fake_connection)
+    monkeypatch.setattr(ideas_route, "fetchrow_dict", fake_fetchrow_dict)
+    monkeypatch.setattr(ideas_route, "compute_idea_freshness", fake_compute_freshness)
+    monkeypatch.setattr(ideas_route, "enqueue_pipeline_run", fake_enqueue)
+
+    response = asyncio.run(
+        ideas_route.patch_idea(
+            idea_id="idea-123",
+            body=IdeaUpdateRequest(duration_weeks=8),
+            background_tasks=BackgroundTasks(),
+            auth=AuthContext(user_id="user-123", email="user@example.com", token="token"),
+        )
+    )
+
+    assert response.status_code == 200
+    assert scheduled == []
+
+
+def test_patch_idea_enqueues_pipeline_for_scoring_changes(monkeypatch):
+    """Scoring fields (commitment_hrs, commitment_level, required_skills) must trigger the match worker."""
     row_existing = _idea_row(commitment_hrs=5)
     row_updated = _idea_row(commitment_hrs=12)
 
@@ -211,5 +258,5 @@ def test_patch_idea_skips_pipeline_for_non_intent_changes(monkeypatch):
     )
 
     assert response.status_code == 200
-    assert scheduled == []
+    assert len(scheduled) == 1
 

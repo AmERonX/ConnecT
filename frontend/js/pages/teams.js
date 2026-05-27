@@ -34,41 +34,56 @@ function renderTeams(data) {
         ? teams
             .map(
               (team) => `
-      <div class="team-row slide-up">
-        <div class="team-info">
-          <div class="team-icon-wrap" style="background:rgba(108,99,255,0.12)">👥</div>
-          <div>
-            <div class="team-name">${esc(team.name || 'Unnamed Team')}</div>
-            <div class="team-idea">${(team.members || []).length} members</div>
-          </div>
-        </div>
-        <div class="team-meta">
-          <div class="meta-item">
-            <span class="meta-value">${(team.members || []).length}</span>
-            <span class="meta-label">Members</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-value">${new Date(team.formed_at).toLocaleDateString()}</span>
-            <span class="meta-label">Formed</span>
-          </div>
-        </div>
-      </div>
-      <div class="team-detail-panel">
-        <div class="detail-header">
-          <div class="detail-title">Members</div>
-        </div>
-        ${(team.members || [])
-          .map(
-            (member) => `
-          <div class="member-row">
-            <div class="avatar">${esc(firstLetter(member.name))}</div>
+      <div class="team-card slide-up">
+        <div class="team-card-header">
+          <div class="team-info">
+            <div class="team-icon-wrap" style="background:rgba(108,99,255,0.12)">👥</div>
             <div>
-              <div class="member-name">${esc(member.name || 'Unknown member')}</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                <div class="team-name" id="team-name-text-${team.id}">${esc(team.name || 'Unnamed Team')}</div>
+                <button class="btn btn-ghost btn-sm" style="padding:0 6px;height:24px" data-action="edit-name" data-team-id="${team.id}">✏️ Edit Name</button>
+              </div>
+              <div class="team-idea">Formed ${new Date(team.formed_at).toLocaleDateString()}</div>
             </div>
           </div>
-        `,
-          )
-          .join('')}
+          <div class="team-meta">
+            <div class="meta-item">
+              <span class="meta-value">${(team.members || []).length}</span>
+              <span class="meta-label">Members</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-card-body">
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <div class="detail-title">Team Idea</div>
+              ${team.idea ? `<a href="/idea-editor.html?id=${team.idea.id}" class="btn btn-ghost btn-sm">Edit Idea</a>` : ''}
+            </div>
+            ${team.idea ? `
+              <div style="margin-bottom:16px">
+                <h4 style="font-size:0.9rem;margin-bottom:4px;font-weight:600">Problem</h4>
+                <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.5;margin:0">${esc(team.idea.problem)}</p>
+              </div>
+              <div>
+                <h4 style="font-size:0.9rem;margin-bottom:4px;font-weight:600">Solution Idea</h4>
+                <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.5;margin:0">${esc(team.idea.solution_idea || 'No solution idea provided.')}</p>
+              </div>
+            ` : '<p style="font-size:0.875rem;color:var(--text-secondary)">No active idea found for this team.</p>'}
+          </div>
+
+          <div>
+            <div class="detail-title" style="margin-bottom:16px">Members</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              ${(team.members || []).map(member => `
+                <div class="member-row" style="padding:0;border:none">
+                  <div class="avatar">${esc(firstLetter(member.name))}</div>
+                  <div class="member-name">${esc(member.name || 'Unknown member')}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
       </div>
     `,
             )
@@ -162,6 +177,59 @@ function renderTeams(data) {
         showTeamsError(error.message || 'Failed to decline request.');
         button.removeAttribute('disabled');
       }
+    });
+  }
+
+  for (const button of container.querySelectorAll('button[data-action="edit-name"]')) {
+    button.addEventListener('click', () => {
+      const teamId = button.dataset.teamId;
+      const nameContainer = document.getElementById(`team-name-text-${teamId}`);
+      const currentName = nameContainer.textContent === 'Unnamed Team' ? '' : nameContainer.textContent;
+      
+      const inputId = `team-name-input-${teamId}`;
+      nameContainer.innerHTML = `
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="text" id="${inputId}" class="form-input" style="padding:2px 8px;font-size:0.9rem;height:28px;width:150px" value="${esc(currentName)}" placeholder="Team name">
+          <button class="btn btn-primary btn-sm" style="padding:0 8px;height:28px" data-action="save-name">Save</button>
+          <button class="btn btn-ghost btn-sm" style="padding:0 8px;height:28px" data-action="cancel-name">Cancel</button>
+        </div>
+      `;
+      button.style.display = 'none';
+
+      const input = document.getElementById(inputId);
+      input.focus();
+
+      const saveBtn = nameContainer.querySelector('button[data-action="save-name"]');
+      const cancelBtn = nameContainer.querySelector('button[data-action="cancel-name"]');
+
+      cancelBtn.addEventListener('click', () => {
+        nameContainer.textContent = currentName || 'Unnamed Team';
+        button.style.display = 'inline-block';
+      });
+
+      saveBtn.addEventListener('click', async () => {
+        const newName = input.value.trim();
+        if (newName !== '' && newName !== currentName) {
+          saveBtn.setAttribute('disabled', 'disabled');
+          cancelBtn.setAttribute('disabled', 'disabled');
+          try {
+            await apiFetch(`/teams/${teamId}`, { method: 'PATCH', body: { name: newName } });
+            await load();
+          } catch (error) {
+            showTeamsError(error.message || 'Failed to rename team.');
+            saveBtn.removeAttribute('disabled');
+            cancelBtn.removeAttribute('disabled');
+          }
+        } else {
+          nameContainer.textContent = currentName || 'Unnamed Team';
+          button.style.display = 'inline-block';
+        }
+      });
+      
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') saveBtn.click();
+        if (e.key === 'Escape') cancelBtn.click();
+      });
     });
   }
 }

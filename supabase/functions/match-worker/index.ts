@@ -12,11 +12,13 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
 
-    const staleUpdated = await updateStaleMatches();
+    // Discover new pairs first, THEN score — so newly discovered matches
+    // are immediately scored in the same pipeline run.
     const newDiscovered = await discoverNewMatches();
+    const staleUpdated = await updateStaleMatches();
 
     return new Response(
-      JSON.stringify({ stale_updated: staleUpdated, new_discovered: newDiscovered }),
+      JSON.stringify({ new_discovered: newDiscovered, stale_updated: staleUpdated }),
       { status: 200 },
     );
   } catch (err) {

@@ -9,7 +9,7 @@ from app.models.idea import CanonicalizeRequest, IdeaCreateRequest, IdeaUpdateRe
 from app.responses import success_response
 from app.services.canonicalize import canonicalize, get_client
 from app.services.freshness import compute_idea_freshness
-from app.services.idea_updates import build_idea_update_payload
+from app.services.idea_updates import INTENT_FIELDS, build_idea_update_payload
 from app.services.pipeline import enqueue_pipeline_run
 from app.services.rate_limiter import canonicalize_rate_limiter
 
@@ -22,12 +22,15 @@ async def _serialize_idea(conn, row: dict[str, Any], requester_id: str) -> dict[
     return {
         "id": str(row["id"]),
         "user_id": str(row["user_id"]),
+        "title": row.get("title"),
         "problem": row["problem"],
         "solution_idea": row.get("solution_idea"),
         "approach": row.get("approach"),
         "tags": row.get("tags"),
         "commitment_hrs": row.get("commitment_hrs"),
         "duration_weeks": row.get("duration_weeks"),
+        "commitment_level": row.get("commitment_level"),
+        "required_skills": row.get("required_skills") or [],
         "is_active": bool(row["is_active"]),
         "freshness": freshness,
         "canonical_text": row.get("canonical_text") if str(row["user_id"]) == requester_id else None,
@@ -86,19 +89,23 @@ async def create_idea(
             conn,
             """
             INSERT INTO project_ideas
-                (user_id, problem, solution_idea, approach, tags,
-                 commitment_hrs, duration_weeks, canonical_text, embedding_stale)
+                (user_id, title, problem, solution_idea, approach, tags,
+                 commitment_hrs, duration_weeks, commitment_level, required_skills,
+                 canonical_text, embedding_stale)
             VALUES
-                ($1, $2, $3, $4, $5, $6, $7, $8, true)
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true)
             RETURNING *
             """,
             auth.user_id,
+            body.title,
             body.problem,
             body.solution_idea,
             body.approach,
             body.tags,
             body.commitment_hrs,
             body.duration_weeks,
+            body.commitment_level,
+            body.required_skills or [],
             body.canonical_text,
         )
 
@@ -164,7 +171,7 @@ async def patch_idea(
     background_tasks: BackgroundTasks,
     auth: AuthContext = Depends(get_auth_context),
 ):
-    requested_fields = body.model_dump(exclude_none=True)
+    requested_fields = body.model_dump(exclude_unset=True)
 
     async with db.connection(auth.user_id) as conn:
         existing = await fetchrow_dict(
@@ -181,10 +188,18 @@ async def patch_idea(
             raise AppError(code="NOT_FOUND", message="No idea found with this ID.", status_code=404)
 
         if str(existing["user_id"]) != auth.user_id:
-            raise AppError(code="FORBIDDEN", message="You do not own this idea.", status_code=403)
+            if existing.get("team_id"):
+                is_member = await fetchrow_dict(conn, "SELECT 1 FROM team_members WHERE team_id = $1 AND user_id = $2", existing["team_id"], auth.user_id)
+                if not is_member:
+                    raise AppError(code="FORBIDDEN", message="You do not have permission to edit this team idea.", status_code=403)
+            else:
+                raise AppError(code="FORBIDDEN", message="You do not own this idea.", status_code=403)
 
         changed_fields = _changed_fields(existing, requested_fields)
         payload = build_idea_update_payload(changed_fields)
+        
+        scoring_fields_changed = bool(set(payload.keys()) & {"commitment_level", "required_skills", "commitment_hrs"})
+        touches_intent_or_scoring = bool(set(payload.keys()) & (INTENT_FIELDS | {"commitment_level", "required_skills", "commitment_hrs"}))
 
         if payload:
             assignments = []
@@ -193,9 +208,25 @@ async def patch_idea(
                 assignments.append(f"{key} = ${idx}")
                 values.append(value)
 
+            if touches_intent_or_scoring:
+                assignments.append("refresh_count = CASE WHEN now() - last_refresh_window > interval '1 hour' THEN 1 ELSE refresh_count + 1 END")
+                assignments.append("last_refresh_window = CASE WHEN now() - last_refresh_window > interval '1 hour' THEN now() ELSE last_refresh_window END")
+
             values.append(idea_id)
 
             async with conn.transaction():
+                if scoring_fields_changed:
+                    # Mark existing matches as stale
+                    await conn.execute(
+                        """
+                        UPDATE matches SET is_stale = true
+                        WHERE id IN (
+                            SELECT match_id FROM match_participants WHERE idea_id = $1
+                        )
+                        """,
+                        idea_id
+                    )
+
                 updated = await fetchrow_dict(
                     conn,
                     f"""
@@ -206,12 +237,19 @@ async def patch_idea(
                     """,
                     *values,
                 )
+
+                if updated.get("refresh_count") is not None and updated["refresh_count"] > 5:
+                    raise AppError(
+                        code="TOO_MANY_REQUESTS",
+                        message="You have exceeded the limit of 5 idea updates per hour.",
+                        status_code=429
+                    )
         else:
             updated = existing
 
         serialized = await _serialize_idea(conn, updated, auth.user_id)
 
-    if payload.get("embedding_stale") is True:
+    if payload.get("embedding_stale") is True or scoring_fields_changed:
         enqueue_pipeline_run(background_tasks)
 
     return success_response(serialized)
@@ -220,12 +258,18 @@ async def patch_idea(
 @router.delete("/{idea_id}")
 async def delete_idea(idea_id: str, auth: AuthContext = Depends(get_auth_context)):
     async with db.connection(auth.user_id) as conn:
-        existing = await fetchrow_dict(conn, "SELECT id, user_id FROM project_ideas WHERE id = $1", idea_id)
+        existing = await fetchrow_dict(conn, "SELECT id, user_id, team_id FROM project_ideas WHERE id = $1", idea_id)
 
         if not existing:
             raise AppError(code="NOT_FOUND", message="No idea found with this ID.", status_code=404)
+            
         if str(existing["user_id"]) != auth.user_id:
-            raise AppError(code="FORBIDDEN", message="You do not own this idea.", status_code=403)
+            if existing.get("team_id"):
+                is_member = await fetchrow_dict(conn, "SELECT 1 FROM team_members WHERE team_id = $1 AND user_id = $2", existing["team_id"], auth.user_id)
+                if not is_member:
+                    raise AppError(code="FORBIDDEN", message="You do not have permission to delete this team idea.", status_code=403)
+            else:
+                raise AppError(code="FORBIDDEN", message="You do not own this idea.", status_code=403)
 
         await conn.execute(
             """

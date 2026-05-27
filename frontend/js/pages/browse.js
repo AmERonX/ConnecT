@@ -9,6 +9,7 @@ bindSidebar();
 bindTopbarProfile(session);
 
 const ideaFilter = document.getElementById('idea-filter');
+const typeFilter = document.getElementById('type-filter');
 const sortFilter = document.getElementById('sort-filter');
 const grid = document.querySelector('.match-grid');
 const countEl = document.querySelector('.results-count');
@@ -17,6 +18,7 @@ const loadMoreBtn = document.getElementById('load-more-btn');
 const state = {
   ideas: [],
   selected: 'all',
+  type: 'all',
   sort: 'score',
   cursors: new Map(),
   buckets: new Map(),
@@ -70,24 +72,66 @@ async function retryPipeline() {
   await refreshMatches(true);
 }
 
+function scoreBar(value, label, color) {
+  const pct = Math.round((value ?? 0) * 100);
+  return `
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.7rem;color:var(--text-secondary)">
+      <span style="width:62px;flex-shrink:0">${label}</span>
+      <div style="flex:1;height:4px;border-radius:2px;background:var(--border);overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${color};border-radius:2px;transition:width 0.4s ease"></div>
+      </div>
+      <span style="width:28px;text-align:right;font-variant-numeric:tabular-nums">${pct}%</span>
+    </div>`;
+}
+
+const COMMITMENT_LABELS = {
+  casual: 'Casual',
+  portfolio: 'Portfolio',
+  serious: 'Serious',
+  startup_seed: 'Startup Seed',
+};
+
 function render(items) {
   if (items.length) {
     setSummary(`Showing <strong>${items.length}</strong> matches`);
     grid.innerHTML = items
       .map((item) => {
-        const ownerName = item?.matched_idea?.owner?.name || 'Unknown User';
-        const ownerInitial = initials(ownerName);
+        const isTeam = !!item?.matched_idea?.team_id;
+        const ownerName = isTeam 
+          ? `Team (Created by ${item?.matched_idea?.owner?.name || 'Unknown User'})` 
+          : item?.matched_idea?.owner?.name || 'Unknown User';
+        const ownerInitial = isTeam ? '👥' : initials(item?.matched_idea?.owner?.name || 'Unknown User');
         const githubUrl = safeExternalUrl(item?.matched_idea?.owner?.github_url);
 
         const profileAction = githubUrl
           ? `<a class="btn btn-ghost btn-sm" href="${esc(githubUrl)}" target="_blank" rel="noreferrer noopener">GitHub</a>`
           : '<button class="btn btn-ghost btn-sm" type="button" disabled title="No public profile linked">Profile N/A</button>';
 
+        const commitment = item?.matched_idea?.commitment_level;
+        const commitChip = commitment
+          ? `<span class="tag-chip" style="background:var(--primary-subtle,rgba(99,102,241,0.12));color:var(--primary)">${esc(COMMITMENT_LABELS[commitment] || commitment)}</span>`
+          : '';
+        const teamChip = isTeam 
+          ? `<span class="tag-chip" style="background:var(--primary);color:white">Team Idea</span>` 
+          : '';
+
+        const hasSubScores = item.embedding_sim != null;
+        const scoreBreakdown = hasSubScores ? `
+          <div style="display:flex;flex-direction:column;gap:4px;margin:10px 0 2px;padding:10px 0;border-top:1px solid var(--border)">
+            ${scoreBar(item.embedding_sim, 'Idea fit', 'var(--primary)')}
+            ${scoreBar(item.skill_complement, 'Skill fit', '#10b981')}
+            ${scoreBar(item.commitment_compat, 'Commitment', '#f59e0b')}
+          </div>` : '';
+
+        const rationale = item.rationale_text
+          ? `<p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.5;margin:8px 0 0;font-style:italic;border-left:2px solid var(--primary);padding-left:8px">${esc(item.rationale_text)}</p>`
+          : '';
+
         return `
         <div class="match-card slide-up">
           <div class="match-header">
             <div class="match-user">
-              <div class="avatar">${esc(ownerInitial)}</div>
+              <div class="avatar">${isTeam ? ownerInitial : esc(ownerInitial)}</div>
               <div>
                 <div class="match-name">${esc(ownerName)}</div>
                 <div class="match-meta">${item?.matched_idea?.commitment_hrs || '—'}h / week</div>
@@ -99,9 +143,13 @@ function render(items) {
             </div>
           </div>
           <p class="match-problem">${esc(item?.matched_idea?.problem || 'No problem statement available.')}</p>
-          <div class="match-footer">
+          ${scoreBreakdown}
+          ${rationale}
+          <div class="match-footer" style="margin-top:10px">
             <div class="match-tags">
               <span class="tag-chip">${item.is_stale ? 'Updating' : 'Fresh'}</span>
+              ${teamChip}
+              ${commitChip}
             </div>
             <div style="display:flex;gap:6px">
               <button class="btn btn-primary btn-sm" data-action="connect" data-match-id="${item.match_id}">Connect</button>
@@ -121,7 +169,8 @@ function render(items) {
             method: 'POST',
             body: { match_id: button.dataset.matchId, signal: 'connection_sent' },
           });
-          button.textContent = 'Sent';
+          button.textContent = 'Sent ✓';
+          button.style.background = 'var(--green, #10b981)';
         } catch (error) {
           button.removeAttribute('disabled');
           setSummary(`<span style="color:var(--red)">${esc(error.message || 'Failed to send request.')}</span>`);
@@ -133,20 +182,23 @@ function render(items) {
 
   const meta = selectedMeta();
   const anyComputing = meta.some((item) => item.freshness === 'computing');
+  const anyScoring   = meta.some((item) => item.freshness === 'partial');
   const allNeedInput = meta.length > 0 && meta.every((item) => item.freshness === 'needs_input');
 
-  if (anyComputing) {
+  if (anyComputing || anyScoring) {
     const timedOut = state.pollAttempts >= state.maxPollAttempts;
     const suffix = state.pipelineTriggerError
       ? ` ${esc(state.pipelineTriggerError)}`
       : timedOut
         ? ' Matching is taking longer than expected.'
-        : ' We are refreshing recommendations automatically.';
-    setSummary('Preparing recommendations');
+        : anyScoring
+          ? ' Matches found — scoring them now, this takes a few seconds.'
+          : ' We are refreshing recommendations automatically.';
+    setSummary(anyScoring ? 'Scoring matches…' : 'Preparing recommendations');
     emptyState({
-      icon: '⌛',
-      title: 'Recommendations are still computing',
-      text: `Your similar ideas are being embedded and rescored.${suffix}`,
+      icon: '⚡',
+      title: anyScoring ? 'Scoring your matches…' : 'Recommendations are still computing',
+      text: `${anyScoring ? 'Your matches were found and are being scored.' : 'Your similar ideas are being embedded and rescored.'}${suffix}`,
       actionLabel: timedOut || state.pipelineTriggerError ? 'Retry now' : null,
       actionId: 'retry-pipeline-btn',
     });
@@ -203,12 +255,20 @@ function sortItems(items) {
 }
 
 function renderCurrentSelection() {
+  let items = [];
   if (state.selected === 'all') {
-    render(sortItems(aggregateAll()));
-    return;
+    items = aggregateAll();
+  } else {
+    items = [...(state.buckets.get(state.selected) || [])];
   }
 
-  render(sortItems([...(state.buckets.get(state.selected) || [])]));
+  if (state.type === 'individuals') {
+    items = items.filter(item => !item?.matched_idea?.team_id);
+  } else if (state.type === 'teams') {
+    items = items.filter(item => !!item?.matched_idea?.team_id);
+  }
+
+  render(sortItems(items));
 }
 
 async function triggerPipelineOnce() {
@@ -246,10 +306,14 @@ function updateLoadMoreVisibility() {
   loadMoreBtn.style.display = state.cursors.get(state.selected) ? 'inline-flex' : 'none';
 }
 
+function needsPipelineWork(meta) {
+  return meta.freshness === 'computing' || meta.freshness === 'partial';
+}
+
 function schedulePollingIfNeeded() {
   clearPolling();
 
-  if (!selectedMeta().some((item) => item.freshness === 'computing')) {
+  if (!selectedMeta().some(needsPipelineWork)) {
     return;
   }
 
@@ -281,7 +345,7 @@ async function refreshMatches(reset = true) {
     renderCurrentSelection();
     updateLoadMoreVisibility();
 
-    if (selectedMeta().some((item) => item.freshness === 'computing')) {
+    if (selectedMeta().some(needsPipelineWork)) {
       await triggerPipelineOnce();
       renderCurrentSelection();
       schedulePollingIfNeeded();
@@ -298,7 +362,12 @@ async function init() {
 
   ideaFilter.innerHTML = `
     <option value="all">All Ideas (aggregated)</option>
-    ${state.ideas.map((idea) => `<option value="${idea.id}">${esc(idea.problem)}</option>`).join('')}
+    ${state.ideas.map((idea) => {
+      const label = idea.title
+        ? idea.title
+        : (idea.problem || '').split(/[.!?]/)[0].trim().slice(0, 55);
+      return `<option value="${idea.id}">${esc(label)}</option>`;
+    }).join('')}
   `;
 
   ideaFilter.addEventListener('change', async () => {
@@ -312,6 +381,11 @@ async function init() {
 
   sortFilter.addEventListener('change', () => {
     state.sort = sortFilter.value;
+    renderCurrentSelection();
+  });
+
+  typeFilter?.addEventListener('change', () => {
+    state.type = typeFilter.value;
     renderCurrentSelection();
   });
 

@@ -5,12 +5,12 @@ from fastapi import BackgroundTasks
 
 from app.config import settings
 from app.errors import AppError
+from app.services.rationale_worker import run_rationale_worker
 
 log = logging.getLogger(__name__)
 
 _WORKER_NAMES = ("embedding-worker", "match-worker")
 _TRIGGER_TIMEOUT_SECONDS = 15.0
-
 
 def _worker_url(worker_name: str) -> str:
     return f"{settings.normalized_supabase_url}/functions/v1/{worker_name}"
@@ -24,7 +24,7 @@ def _worker_headers() -> dict[str, str]:
     }
 
 
-async def _invoke_worker(worker_name: str, client: httpx.AsyncClient) -> None:
+async def _invoke_worker(worker_name: str, client: httpx.AsyncClient) -> dict:
     try:
         response = await client.post(_worker_url(worker_name), headers=_worker_headers(), json={})
     except httpx.HTTPError as exc:
@@ -40,12 +40,31 @@ async def _invoke_worker(worker_name: str, client: httpx.AsyncClient) -> None:
             message=f"{worker_name} returned status {response.status_code}. Verify Supabase URL/service-role key.",
             status_code=503,
         )
+        
+    return response.json()
 
 
 async def run_pipeline_once() -> None:
     async with httpx.AsyncClient(timeout=_TRIGGER_TIMEOUT_SECONDS) as client:
-        for worker_name in _WORKER_NAMES:
-            await _invoke_worker(worker_name, client)
+        # Drain embedding worker queue
+        for _ in range(10): # max 10 iterations to prevent infinite loop
+            resp = await _invoke_worker("embedding-worker", client)
+            if not resp or resp.get("processed", 0) == 0:
+                break
+                
+        # Drain match worker queue
+        for _ in range(10):
+            resp = await _invoke_worker("match-worker", client)
+            if not resp or (resp.get("new_discovered", 0) == 0 and resp.get("stale_updated", 0) == 0):
+                break
+
+    # After scoring is refreshed, generate any missing rationales
+    try:
+        written = await run_rationale_worker()
+        log.info("pipeline: rationale_worker wrote %d rationale(s)", written)
+    except Exception:
+        log.exception("pipeline: rationale_worker failed (non-fatal)")
+
 
 
 async def run_pipeline_safely() -> None:

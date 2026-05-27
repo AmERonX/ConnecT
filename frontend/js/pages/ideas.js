@@ -6,13 +6,20 @@ import { esc } from '../utils.js';
 
 function freshnessBadge(freshness) {
   const map = {
-    fresh: { cls: 'badge-fresh', label: 'Fresh' },
-    computing: { cls: 'badge-computing', label: 'Computing' },
-    partial: { cls: 'badge-partial', label: 'Partial' },
+    fresh:       { cls: 'badge-fresh',       label: 'Fresh' },
+    computing:   { cls: 'badge-computing',   label: 'Computing…' },
+    partial:     { cls: 'badge-computing',   label: 'Scoring…' },
     needs_input: { cls: 'badge-needs-input', label: 'Needs Input' },
   };
   const chosen = map[freshness] || map.partial;
   return `<span class="badge ${chosen.cls}"><span class="badge-dot"></span> ${chosen.label}</span>`;
+}
+
+function cardTitle(idea) {
+  if (idea.title) return esc(idea.title);
+  // Fallback: first sentence of problem (up to 72 chars)
+  const first = (idea.problem || '').split(/[.!?]/)[0].trim();
+  return esc(first.length > 72 ? first.slice(0, 69) + '…' : first);
 }
 
 const session = await requireAuth();
@@ -30,15 +37,20 @@ try {
         (idea) => `
       <div class="idea-card slide-up" data-idea-id="${idea.id}">
         <div class="idea-card-header">
-          <h3 class="idea-card-problem">${esc(idea.problem)}</h3>
+          <div style="flex:1;min-width:0">
+            <h3 class="idea-card-problem" style="font-size:1rem;margin-bottom:3px">${cardTitle(idea)}</h3>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(idea.problem)}</p>
+          </div>
           ${freshnessBadge(idea.freshness)}
         </div>
-        <p class="idea-card-approach">${esc(idea.approach || idea.solution_idea || 'No approach added yet.')}</p>
-        <div class="idea-card-footer">
+        <div class="idea-card-footer" style="margin-top:10px">
           <div style="display:flex;gap:5px;flex-wrap:wrap">
             ${(idea.tags || []).map((tag) => `<span class="tag-chip">${esc(tag)}</span>`).join('')}
           </div>
-          <div class="idea-matches">${Number(idea.match_count || 0)} matches</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="idea-matches">${Number(idea.match_count || 0)} match${idea.match_count === 1 ? '' : 'es'}</div>
+            <a href="/idea-editor.html?id=${idea.id}" class="btn btn-ghost btn-sm" onclick="event.stopPropagation()">Edit</a>
+          </div>
         </div>
       </div>
     `,

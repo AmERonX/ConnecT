@@ -91,9 +91,38 @@
     }
     .detail-title { font-size: 1.125rem; font-weight: 700; }
 
+    .team-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: border-color var(--t-normal), box-shadow var(--t-normal);
+    }
+    .team-card:hover {
+      border-color: rgba(108,99,255,0.3);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .team-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .team-card-body {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 32px;
+    }
+
     @media (max-width: 768px) {
       .team-row { flex-direction: column; align-items: flex-start; }
       .team-meta { align-self: flex-start; }
+      .team-card-body { grid-template-columns: 1fr; }
     }
   </style>
 </head>

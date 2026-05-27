@@ -10,9 +10,14 @@ from app.services.pagination import decode_cursor, next_cursor
 router = APIRouter(tags=["matches"])
 
 
-def _passes_hard_filters(viewer_idea: dict, candidate_idea: dict, candidate_user: dict) -> bool:
-    if candidate_user.get("has_existing_team"):
-        return False
+def _passes_hard_filters(viewer_idea: dict, candidate_idea: dict) -> bool:
+    # hard filter ±5 hours time commitments
+    viewer_hrs = viewer_idea.get("commitment_hrs")
+    candidate_hrs = candidate_idea.get("commitment_hrs")
+    if viewer_hrs is not None and candidate_hrs is not None:
+        if abs(viewer_hrs - candidate_hrs) > 5:
+            return False
+            
     return True
 
 
@@ -65,9 +70,15 @@ async def list_matches_for_idea(
                 m.explanation,
                 m.is_stale,
                 m.computed_at,
+                m.embedding_sim,
+                m.skill_complement,
+                m.commitment_compat,
+                mr.rationale_text,
                 pi.id AS other_idea_id,
                 pi.problem,
                 pi.commitment_hrs,
+                pi.commitment_level,
+                pi.team_id,
                 pi.user_id AS owner_id,
                 p.name AS owner_name,
                 p.github_url,
@@ -83,6 +94,7 @@ async def list_matches_for_idea(
                 LIMIT 1
             ) pi ON true
             JOIN public_profiles p ON p.id = pi.user_id
+            LEFT JOIN match_rationales mr ON mr.match_id = m.id
             WHERE mp.idea_id = $1
               AND m.final_score IS NOT NULL
               AND m.final_score >= $2
@@ -105,8 +117,7 @@ async def list_matches_for_idea(
         filtered = []
         for row in rows:
             candidate_idea = {"commitment_hrs": row.get("commitment_hrs")}
-            candidate_user = {"has_existing_team": row.get("has_existing_team")}
-            if not _passes_hard_filters(viewer_idea, candidate_idea, candidate_user):
+            if not _passes_hard_filters(viewer_idea, candidate_idea):
                 continue
 
             filtered.append(
@@ -115,12 +126,18 @@ async def list_matches_for_idea(
                     "is_stale": bool(row["is_stale"]),
                     "final_score": float(row["final_score"]),
                     "similarity_score": float(row["similarity_score"]),
+                    "embedding_sim": float(row["embedding_sim"]) if row.get("embedding_sim") is not None else None,
+                    "skill_complement": float(row["skill_complement"]) if row.get("skill_complement") is not None else None,
+                    "commitment_compat": float(row["commitment_compat"]) if row.get("commitment_compat") is not None else None,
                     "explanation": row.get("explanation"),
+                    "rationale_text": row.get("rationale_text"),
                     "computed_at": row["computed_at"].isoformat() if row.get("computed_at") else None,
                     "matched_idea": {
                         "id": str(row["other_idea_id"]),
                         "problem": row["problem"],
                         "commitment_hrs": row.get("commitment_hrs"),
+                        "commitment_level": row.get("commitment_level"),
+                        "team_id": str(row["team_id"]) if row.get("team_id") else None,
                         "owner": {
                             "id": str(row["owner_id"]),
                             "name": row["owner_name"],

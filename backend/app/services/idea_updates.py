@@ -4,7 +4,7 @@ INTENT_FIELDS = {"problem", "solution_idea", "approach", "tags"}
 
 
 def build_idea_update_payload(payload: dict[str, Any]) -> dict[str, Any]:
-    updated_fields = {k: v for k, v in payload.items() if v is not None}
+    updated_fields = {k: v for k, v in payload.items()}
     touches_intent = bool(set(updated_fields.keys()) & INTENT_FIELDS)
 
     if touches_intent:

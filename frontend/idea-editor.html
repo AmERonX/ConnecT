@@ -180,6 +180,12 @@
 
           <form id="idea-form" style="display:flex;flex-direction:column;gap:18px;">
             <div class="form-group">
+              <label class="form-label" for="title">Title <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+              <input class="form-input" type="text" id="title" placeholder="e.g. AI Product Description Writer" maxlength="80">
+              <span class="form-hint">A short, memorable name for your project</span>
+            </div>
+
+            <div class="form-group">
               <label class="form-label" for="problem">Problem *</label>
               <textarea class="form-textarea" id="problem" placeholder="What problem does this project solve? E.g. 'Students can't find study partners who complement their weak areas'" rows="3" required></textarea>
               <span class="form-hint">Be specific about who has this problem and why it matters</span>
@@ -212,6 +218,26 @@
                 <label class="form-label" for="weeks">Duration (weeks)</label>
                 <input class="form-input" type="number" id="weeks" placeholder="e.g. 8" min="1" max="52">
               </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="commitment-level">Commitment Level</label>
+              <select class="form-input" id="commitment-level">
+                <option value="">— Select commitment level —</option>
+                <option value="casual">Casual — a few hours, low pressure</option>
+                <option value="portfolio">Portfolio — build something to show off</option>
+                <option value="serious">Serious — dedicated, ship-focused</option>
+                <option value="startup_seed">Startup Seed — building a real product</option>
+              </select>
+              <span class="form-hint">Helps match you with teammates at the same intensity level</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Skills Needed from Teammates</label>
+              <div class="tag-input-container" id="skills-container">
+                <input class="tag-input" id="skills-field" placeholder="Type a skill and press Enter…">
+              </div>
+              <span class="form-hint">What skills should your ideal teammate bring? (e.g. React, ML, Design)</span>
             </div>
 
             <button type="button" class="btn btn-primary btn-lg w-full" id="submit-btn">

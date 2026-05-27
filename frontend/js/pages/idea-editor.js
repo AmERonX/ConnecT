@@ -24,6 +24,7 @@ const topbarTitle = document.querySelector('.topbar-title');
 const editorTitle = document.querySelector('.editor-title');
 
 const tagManager = initTagInput('tag-container', 'tag-field', []);
+const skillsManager = initTagInput('skills-container', 'skills-field', []);
 
 let canonicalText = null;
 let persistedSnapshot = null;
@@ -55,12 +56,15 @@ function setStep(step) {
 
 function getFormPayload() {
   return {
+    title: document.getElementById('title')?.value?.trim() || null,
     problem: document.getElementById('problem')?.value?.trim() || '',
     solution_idea: document.getElementById('solution')?.value?.trim() || null,
     approach: document.getElementById('approach')?.value?.trim() || null,
     tags: tagManager.getTags(),
     commitment_hrs: Number(document.getElementById('hours')?.value || 0) || null,
     duration_weeks: Number(document.getElementById('weeks')?.value || 0) || null,
+    commitment_level: document.getElementById('commitment-level')?.value || null,
+    required_skills: skillsManager.getTags(),
   };
 }
 
@@ -146,12 +150,17 @@ async function loadIdea() {
   }
 
   const idea = await apiFetch(`/ideas/${ideaId}`);
+  const titleEl = document.getElementById('title');
+  if (titleEl) titleEl.value = idea.title || '';
   document.getElementById('problem').value = idea.problem || '';
   document.getElementById('solution').value = idea.solution_idea || '';
   document.getElementById('approach').value = idea.approach || '';
   document.getElementById('hours').value = idea.commitment_hrs || '';
   document.getElementById('weeks').value = idea.duration_weeks || '';
+  const commitEl = document.getElementById('commitment-level');
+  if (commitEl) commitEl.value = idea.commitment_level || '';
   tagManager.setTags(idea.tags || []);
+  skillsManager.setTags(idea.required_skills || []);
 
   persistedSnapshot = getFormPayload();
   approvedIntentSnapshot = extractIntent(persistedSnapshot);
@@ -276,7 +285,13 @@ async function saveIdea() {
 
     window.location.href = '/ideas.html';
   } catch (error) {
-    showInlineError(error instanceof ApiError ? error.message : 'Failed to save idea.');
+    let msg = 'Failed to save idea.';
+    if (error?.status === 429 || error?.message?.includes('limit')) {
+      msg = '⚠️ Too many updates — you can only update an idea 5 times per hour. Please try again later.';
+    } else if (error?.message) {
+      msg = error.message;
+    }
+    showInlineError(msg);
     showState(canonicalText ? 'state-approved' : 'state-empty');
   }
 }
