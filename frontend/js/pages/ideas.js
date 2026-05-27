@@ -6,13 +6,13 @@ import { esc } from '../utils.js';
 
 function freshnessBadge(freshness) {
   const map = {
-    fresh:       { cls: 'badge-fresh',       label: 'Fresh' },
-    computing:   { cls: 'badge-computing',   label: 'Computing…' },
-    partial:     { cls: 'badge-computing',   label: 'Scoring…' },
-    needs_input: { cls: 'badge-needs-input', label: 'Needs Input' },
+    fresh:       { cls: 'tag-fresh',       label: 'Fresh' },
+    computing:   { cls: 'tag-serious',   label: 'Computing…' },
+    partial:     { cls: 'tag-serious',   label: 'Scoring…' },
+    needs_input: { cls: 'tag-default', label: 'Needs Input' },
   };
   const chosen = map[freshness] || map.partial;
-  return `<span class="badge ${chosen.cls}"><span class="badge-dot"></span> ${chosen.label}</span>`;
+  return `<span class="tag ${chosen.cls}"> ${chosen.label}</span>`;
 }
 
 function cardTitle(idea) {
@@ -35,34 +35,32 @@ try {
     ideas
       .map(
         (idea) => `
-      <div class="idea-card slide-up" data-idea-id="${idea.id}">
-        <div class="idea-card-header">
-          <div style="flex:1;min-width:0">
-            <h3 class="idea-card-problem" style="font-size:1rem;margin-bottom:3px">${cardTitle(idea)}</h3>
-            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(idea.problem)}</p>
+      <div class="idea-card slide-up" data-idea-id="${idea.id}" style="display:flex;flex-direction:column;gap:12px;padding:16px;border:0.5px solid var(--border);border-radius:12px;background:var(--bg-card);cursor:pointer;transition:border-color var(--t-normal),background var(--t-normal);">
+        <div class="idea-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:12px;border-bottom:0.5px solid var(--border)">
+          <h3 class="idea-card-title" style="font-size:1rem;font-weight:600;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cardTitle(idea)}</h3>
+          <a href="/idea-editor.html?id=${idea.id}" class="btn btn-ghost btn-sm" style="padding:0 8px;height:24px" onclick="event.stopPropagation()">Edit</a>
+        </div>
+        <div class="idea-card-body" style="display:flex;flex-direction:column;gap:12px;flex:1">
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Problem</div>
+            <p style="font-size:0.875rem;color:var(--text-secondary);margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(idea.problem)}</p>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Solution Idea</div>
+            <p style="font-size:0.875rem;color:var(--text-secondary);margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(idea.solution_idea || 'No solution idea provided.')}</p>
+          </div>
+        </div>
+        <div class="idea-card-footer" style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:0.5px solid var(--border)">
+          <div class="idea-matches" style="display:flex;align-items:center;gap:6px;font-size:0.875rem;color:var(--text-secondary)">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            ${Number(idea.match_count || 0)} Match${idea.match_count === 1 ? '' : 'es'}
           </div>
           ${freshnessBadge(idea.freshness)}
-        </div>
-        <div class="idea-card-footer" style="margin-top:10px">
-          <div style="display:flex;gap:5px;flex-wrap:wrap">
-            ${(idea.tags || []).map((tag) => `<span class="tag-chip">${esc(tag)}</span>`).join('')}
-          </div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="idea-matches">${Number(idea.match_count || 0)} match${idea.match_count === 1 ? '' : 'es'}</div>
-            <a href="/idea-editor.html?id=${idea.id}" class="btn btn-ghost btn-sm" onclick="event.stopPropagation()">Edit</a>
-          </div>
         </div>
       </div>
     `,
       )
-      .join('') +
-    `
-    <a href="idea-editor.html" class="idea-new-card slide-up">
-      <div class="idea-new-icon">+</div>
-      <div style="font-weight:600;font-size:0.9375rem">Add New Idea</div>
-      <div style="font-size:0.8125rem;color:var(--text-secondary)">Describe a project and get matched</div>
-    </a>
-  `;
+      .join('');
 
   for (const card of grid.querySelectorAll('.idea-card')) {
     card.addEventListener('click', () => {

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ConnecT — Find Your Perfect Teammate</title>
   <meta name="description" content="AI-powered teammate matching for student builders. Describe your project, get matched with people who complement your skills.">
-  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/main.css?v=1779872581654">
   <style>
     /* ── HERO ──────────────────────────────────────────── */
     .hero {
@@ -21,7 +21,7 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108,99,255,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79, 127, 255,0.18) 0%, transparent 70%),
         radial-gradient(ellipse 40% 40% at 80% 60%, rgba(0,212,255,0.08) 0%, transparent 60%);
     }
 
@@ -48,8 +48,8 @@
       align-items: center;
       gap: 8px;
       padding: 6px 14px;
-      background: rgba(108, 99, 255, 0.12);
-      border: 1px solid rgba(108, 99, 255, 0.25);
+      background: rgba(79, 127, 255, 0.12);
+      border: 1px solid rgba(79, 127, 255, 0.25);
       border-radius: var(--radius-full);
       font-size: 0.8rem;
       font-weight: 600;
@@ -185,9 +185,9 @@
     }
 
     .step-card:hover {
-      border-color: rgba(108,99,255,0.35);
+      border-color: rgba(79, 127, 255,0.35);
       transform: translateY(-4px);
-      box-shadow: var(--shadow-md), 0 0 30px rgba(108,99,255,0.1);
+      box-shadow: var(--shadow-md), 0 0 30px rgba(79, 127, 255,0.1);
     }
 
     .step-number {
@@ -201,7 +201,7 @@
       font-weight: 700;
       color: #fff;
       margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(108,99,255,0.4);
+      box-shadow: 0 4px 12px rgba(79, 127, 255,0.4);
       position: relative;
       z-index: 1;
     }
@@ -221,7 +221,7 @@
     /* ── FEATURES ─────────────────────────────────────── */
     .features-section {
       padding: 96px 0;
-      background: linear-gradient(180deg, transparent 0%, rgba(108,99,255,0.03) 50%, transparent 100%);
+      background: linear-gradient(180deg, transparent 0%, rgba(79, 127, 255,0.03) 50%, transparent 100%);
     }
 
     .features-grid {
@@ -242,7 +242,7 @@
     }
 
     .feature-card:hover {
-      border-color: rgba(108,99,255,0.25);
+      border-color: rgba(79, 127, 255,0.25);
       background: var(--bg-card-hover);
     }
 
@@ -256,7 +256,7 @@
       flex-shrink: 0;
     }
 
-    .feature-icon-purple { background: rgba(108,99,255,0.15); }
+    .feature-icon-purple { background: rgba(79, 127, 255,0.15); }
     .feature-icon-cyan   { background: rgba(0,212,255,0.1); }
     .feature-icon-green  { background: rgba(16,185,129,0.12); }
     .feature-icon-yellow { background: rgba(245,158,11,0.12); }
@@ -280,7 +280,7 @@
 
     .cta-card {
       background: var(--grad-card);
-      border: 1px solid rgba(108,99,255,0.2);
+      border: 1px solid rgba(79, 127, 255,0.2);
       border-radius: var(--radius-xl);
       padding: 72px 48px;
       text-align: center;
@@ -294,7 +294,7 @@
       top: -60px; left: 50%;
       transform: translateX(-50%);
       width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(108,99,255,0.2) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(79, 127, 255,0.2) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -336,12 +336,12 @@
 
     .mock-card {
       background: var(--bg-card);
-      border: 1px solid rgba(108,99,255,0.2);
+      border: 1px solid rgba(79, 127, 255,0.2);
       border-radius: var(--radius-lg);
       padding: 20px;
       max-width: 520px;
       margin: 0 auto;
-      box-shadow: var(--shadow-lg), 0 0 40px rgba(108,99,255,0.12);
+      box-shadow: var(--shadow-lg), 0 0 40px rgba(79, 127, 255,0.12);
     }
 
     .mock-header {
@@ -387,7 +387,7 @@
 
     .mock-tag {
       padding: 3px 10px;
-      background: rgba(108,99,255,0.12);
+      background: rgba(79, 127, 255,0.12);
       color: #a78bfa;
       border-radius: var(--radius-full);
       font-size: 0.75rem;
@@ -473,7 +473,7 @@
       <div class="mock-card">
         <div class="mock-header">
           <div class="mock-user">
-            <div class="avatar" style="background: linear-gradient(135deg,#f093fb,#f5576c)">A</div>
+            <div class="avatar avatar-36 av-pink">A</div>
             <div>
               <div style="font-weight:600;font-size:0.875rem">Aanya Mehta</div>
               <div style="font-size:0.75rem;color:var(--text-secondary)">10h / week</div>
@@ -490,10 +490,10 @@
           using adaptive quizzing to identify knowledge gaps and suggest study sessions.
         </div>
         <div class="mock-tags">
-          <span class="mock-tag">Education</span>
-          <span class="mock-tag">NLP</span>
-          <span class="mock-tag">Matching</span>
-          <span class="mock-tag">Python</span>
+          <span class="tag tag-default">Education</span>
+          <span class="tag tag-default">NLP</span>
+          <span class="tag tag-default">Matching</span>
+          <span class="tag tag-default">Python</span>
         </div>
         <div style="display:flex;gap:8px;margin-top:14px">
           <button class="btn btn-primary btn-sm w-full">Connect</button>

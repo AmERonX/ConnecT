@@ -23,11 +23,12 @@ bindTopbarProfile(session);
 const metaName = session.user?.user_metadata?.name || 'Builder';
 const avatarText = initials(metaName);
 
-for (const avatar of document.querySelectorAll('.welcome-avatar')) {
-  avatar.textContent = avatarText;
+const avatarNode = document.getElementById('welcome-avatar');
+if (avatarNode) {
+  avatarNode.textContent = avatarText;
 }
 
-const welcomeTitle = document.querySelector('.welcome-title');
+const welcomeTitle = document.getElementById('welcome-title');
 if (welcomeTitle) {
   welcomeTitle.textContent = `Welcome back, ${metaName} 👋`;
 }
@@ -47,14 +48,20 @@ const ideas = await loadWithFallback('/ideas/me', [], errors);
 const feedback = await loadWithFallback('/feedback/me', { recent: [], pending_received: [] }, errors);
 const teams = await loadWithFallback('/teams', { teams: [] }, errors);
 
-const statValues = document.querySelectorAll('.stat-value');
-if (statValues[0]) statValues[0].textContent = String(ideas.length || 0);
-if (statValues[1]) {
+const statIdeas = document.getElementById('stat-ideas');
+if (statIdeas) statIdeas.textContent = String(ideas.length || 0);
+
+const statSent = document.getElementById('stat-sent');
+if (statSent) {
   const sentCount = (feedback.recent || []).filter((item) => item.signal === 'connection_sent').length;
-  statValues[1].textContent = String(sentCount);
+  statSent.textContent = String(sentCount);
 }
-if (statValues[2]) statValues[2].textContent = String((feedback.pending_received || []).length);
-if (statValues[3]) statValues[3].textContent = String((teams.teams || []).length);
+
+const statReceived = document.getElementById('stat-received');
+if (statReceived) statReceived.textContent = String((feedback.pending_received || []).length);
+
+const statTeams = document.getElementById('stat-teams');
+if (statTeams) statTeams.textContent = String((teams.teams || []).length);
 
 const activityList = document.querySelector('.activity-list');
 if (activityList) {
@@ -62,7 +69,7 @@ if (activityList) {
   const warning = errors.length
     ? `
       <div class="activity-item slide-up">
-        <div class="activity-dot" style="background:var(--yellow)"></div>
+        <div class="activity-dot" style="background:var(--fill-amber)"></div>
         <span>Some dashboard sections could not load.</span>
       </div>
     `
@@ -74,7 +81,7 @@ if (activityList) {
         .map(
           (item) => `
           <div class="activity-item slide-up">
-            <div class="activity-dot" style="background:var(--primary)"></div>
+            <div class="activity-dot" style="background:var(--brand)"></div>
             <span>${eventLabel(item)}</span>
             <span class="activity-time">${new Date(item.created_at).toLocaleString()}</span>
           </div>

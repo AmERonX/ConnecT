@@ -125,14 +125,19 @@ function renderSkills(skills) {
   const skillsGrid = document.querySelector('#skills-section .skills-grid');
   if (!skillsGrid) return;
 
+  const tagColors = ['tag-blue', 'tag-purple', 'tag-green', 'tag-pink', 'tag-amber'];
+  
   skillsGrid.innerHTML = (skills || []).length
     ? skills
         .map(
-          (skill) => `
-            <button type="button" class="skill-tag skill-tag-button" data-skill-id="${skill.id}" data-skill-name="${esc(skill.skill_name)}">
-              ${esc(skill.skill_name)}${skill.level ? ` (${esc(skill.level)})` : ''} <span style="opacity:0.55;margin-left:4px">×</span>
+          (skill, index) => {
+            const colorClass = tagColors[index % tagColors.length];
+            return `
+            <button type="button" class="tag ${colorClass} skill-tag-button" data-skill-id="${skill.id}" data-skill-name="${esc(skill.skill_name)}" style="border:none;cursor:pointer;padding-right:8px;font-size:0.8125rem">
+              ${esc(skill.skill_name)}${skill.level ? ` (${esc(skill.level)})` : ''} <span style="opacity:0.55;margin-left:4px;font-size:1.2em;line-height:1">×</span>
             </button>
-          `,
+          `;
+          }
         )
         .join('')
     : '<span style="color:var(--text-secondary);font-size:0.875rem">No skills added yet.</span>';

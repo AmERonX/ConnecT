@@ -97,6 +97,24 @@ function render(items) {
     grid.innerHTML = items
       .map((item) => {
         const isTeam = !!item?.matched_idea?.team_id;
+        function getOwnerName(item) {
+          if (item?.matched_idea?.team_id) {
+            return item?.matched_idea?.team?.name || 'Unnamed Team';
+          }
+          return item?.matched_user?.name || 'Unknown User';
+        }
+
+        function cardTitle(idea) {
+          if (!idea) return 'Unknown Idea';
+          if (idea.title && idea.title.trim()) return esc(idea.title);
+          if (idea.solution_idea && idea.solution_idea.trim()) {
+            const words = idea.solution_idea.trim().split(' ');
+            if (words.length <= 5) return esc(idea.solution_idea);
+            return esc(words.slice(0, 5).join(' ') + '…');
+          }
+          const words = (idea.problem || '').trim().split(' ');
+          return esc(words.slice(0, 5).join(' ') + '…');
+        }
         const ownerName = isTeam 
           ? `Team (Created by ${item?.matched_idea?.owner?.name || 'Unknown User'})` 
           : item?.matched_idea?.owner?.name || 'Unknown User';
@@ -108,11 +126,12 @@ function render(items) {
           : '<button class="btn btn-ghost btn-sm" type="button" disabled title="No public profile linked">Profile N/A</button>';
 
         const commitment = item?.matched_idea?.commitment_level;
+        const commitCls = commitment === 'serious' ? 'tag-blue' : commitment === 'portfolio' ? 'tag-purple' : 'tag-amber';
         const commitChip = commitment
-          ? `<span class="tag-chip" style="background:var(--primary-subtle,rgba(99,102,241,0.12));color:var(--primary)">${esc(COMMITMENT_LABELS[commitment] || commitment)}</span>`
+          ? `<span class="tag ${commitCls}">${esc(COMMITMENT_LABELS[commitment] || commitment)}</span>`
           : '';
         const teamChip = isTeam 
-          ? `<span class="tag-chip" style="background:var(--primary);color:white">Team Idea</span>` 
+          ? `<span class="tag tag-pink">Team Idea</span>` 
           : '';
 
         const hasSubScores = item.embedding_sim != null;
@@ -131,7 +150,7 @@ function render(items) {
         <div class="match-card slide-up">
           <div class="match-header">
             <div class="match-user">
-              <div class="avatar">${isTeam ? ownerInitial : esc(ownerInitial)}</div>
+              <div class="avatar avatar-36 av-purple">${isTeam ? ownerInitial : esc(ownerInitial)}</div>
               <div>
                 <div class="match-name">${esc(ownerName)}</div>
                 <div class="match-meta">${item?.matched_idea?.commitment_hrs || '—'}h / week</div>
@@ -142,12 +161,15 @@ function render(items) {
               <div class="match-score">${Math.round((item.final_score || 0) * 100)}%</div>
             </div>
           </div>
-          <p class="match-problem">${esc(item?.matched_idea?.problem || 'No problem statement available.')}</p>
+          <div style="margin-bottom:12px">
+            <h3 class="match-title" style="font-size:1rem;font-weight:600;margin:0 0 4px 0">${cardTitle(item?.matched_idea)}</h3>
+            <p class="match-problem" style="margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(item?.matched_idea?.problem || 'No problem statement available.')}</p>
+          </div>
           ${scoreBreakdown}
           ${rationale}
-          <div class="match-footer" style="margin-top:10px">
-            <div class="match-tags">
-              <span class="tag-chip">${item.is_stale ? 'Updating' : 'Fresh'}</span>
+          <div class="match-footer" style="margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+            <div class="match-tags" style="display:flex;gap:6px;flex-wrap:wrap">
+              <span class="tag ${item.is_stale ? 'tag-amber' : 'tag-green'}">${item.is_stale ? 'Updating' : 'Fresh'}</span>
               ${teamChip}
               ${commitChip}
             </div>
