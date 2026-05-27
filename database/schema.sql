@@ -85,16 +85,18 @@ CREATE TABLE teams (
 ALTER TABLE project_ideas ADD COLUMN team_id UUID REFERENCES teams(id) ON DELETE SET NULL;
 
 CREATE TABLE team_members (
-    team_id     UUID REFERENCES teams(id) ON DELETE CASCADE,
-    user_id     UUID REFERENCES users(id) ON DELETE CASCADE,
+    team_id         UUID REFERENCES teams(id) ON DELETE CASCADE,
+    user_id         UUID REFERENCES users(id) ON DELETE CASCADE,
+    marked_complete BOOLEAN DEFAULT false,
+    is_leader       BOOLEAN DEFAULT false,
     PRIMARY KEY (team_id, user_id)
 );
 
 CREATE TABLE peer_ratings (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    rated_user_id       UUID NOT NULL REFERENCES users(id),
-    rater_user_id       UUID NOT NULL REFERENCES users(id),
-    team_id             UUID NOT NULL REFERENCES teams(id),
+    rated_user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    rater_user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    team_id             UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
     reliability         INT CHECK (reliability BETWEEN 1 AND 5),
     communication       INT CHECK (communication BETWEEN 1 AND 5),
     contribution        INT CHECK (contribution BETWEEN 1 AND 5),
@@ -105,8 +107,8 @@ CREATE TABLE peer_ratings (
 
 CREATE TABLE matches (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    idea_a_id           UUID NOT NULL REFERENCES project_ideas(id),
-    idea_b_id           UUID NOT NULL REFERENCES project_ideas(id),
+    idea_a_id           UUID NOT NULL REFERENCES project_ideas(id) ON DELETE CASCADE,
+    idea_b_id           UUID NOT NULL REFERENCES project_ideas(id) ON DELETE CASCADE,
     similarity_score    FLOAT,
     final_score         FLOAT,
     explanation         TEXT,
@@ -131,8 +133,8 @@ CREATE TABLE match_participants (
 
 CREATE TABLE match_feedback (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    match_id        UUID NOT NULL REFERENCES matches(id),
-    actor_user_id   UUID NOT NULL REFERENCES users(id),
+    match_id        UUID NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
+    actor_user_id   UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     signal          TEXT CHECK (signal IN (
                         'connection_sent',
                         'connection_accepted',
@@ -434,6 +436,15 @@ WITH CHECK (is_team_member(teams.id));
 
 CREATE POLICY "team_members: members can read"
 ON team_members FOR SELECT TO authenticated
+USING (is_team_member(team_members.team_id));
+
+CREATE POLICY "team_members: members can update"
+ON team_members FOR UPDATE TO authenticated
+USING (is_team_member(team_members.team_id))
+WITH CHECK (is_team_member(team_members.team_id));
+
+CREATE POLICY "team_members: members can delete"
+ON team_members FOR DELETE TO authenticated
 USING (is_team_member(team_members.team_id));
 
 CREATE OR REPLACE FUNCTION claim_stale_ideas(batch_limit INT DEFAULT 10)

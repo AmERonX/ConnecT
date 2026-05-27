@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app.auth import AuthContext, get_auth_context
 from app.db import db, fetch_dict, fetchrow_dict
 from app.errors import AppError
-from app.models.team import TeamCreateRequest, TeamUpdateRequest
+from app.models.team import TeamCreateRequest, TeamUpdateRequest, PeerRatingRequest, TeamMemberCompleteRequest
 from app.responses import success_response
 
 router = APIRouter(tags=["teams"])
@@ -25,7 +25,13 @@ async def _team_with_members(conn, team_id: str) -> dict:
     members = await fetch_dict(
         conn,
         """
-        SELECT p.id, p.name
+        SELECT p.id, p.name, tm.marked_complete, tm.is_leader,
+               EXISTS (
+                   SELECT 1 FROM peer_ratings pr
+                   WHERE pr.team_id = tm.team_id
+                     AND pr.rater_user_id = auth.uid()
+                     AND pr.rated_user_id = p.id
+               ) AS rated_by_me
         FROM team_members tm
         JOIN public_profiles p ON p.id = tm.user_id
         WHERE tm.team_id = $1
@@ -39,7 +45,7 @@ async def _team_with_members(conn, team_id: str) -> dict:
         """
         SELECT id, title, problem, solution_idea
         FROM project_ideas
-        WHERE team_id = $1 AND is_active = true
+        WHERE team_id = $1
         LIMIT 1
         """,
         team_id,
@@ -50,7 +56,7 @@ async def _team_with_members(conn, team_id: str) -> dict:
         "name": team.get("name"),
         "formed_at": team["formed_at"].isoformat(),
         "completed": bool(team["completed"]),
-        "members": [{"id": str(member["id"]), "name": member["name"]} for member in members],
+        "members": [{"id": str(member["id"]), "name": member["name"], "marked_complete": bool(member["marked_complete"]), "is_leader": bool(member["is_leader"]), "rated_by_me": bool(member.get("rated_by_me", False))} for member in members],
         "idea": {
             "id": str(idea["id"]),
             "title": idea["title"],
@@ -142,6 +148,25 @@ async def create_team(body: TeamCreateRequest, auth: AuthContext = Depends(get_a
                     """,
                     new_user_idea["id"],
                 )
+                
+                await conn.execute(
+                    """
+                    UPDATE teams
+                    SET completed = false
+                    WHERE id = $1
+                    """,
+                    team_id,
+                )
+                
+                await conn.execute(
+                    """
+                    UPDATE project_ideas
+                    SET is_active = true
+                    WHERE team_id = $1
+                    """,
+                    team_id,
+                )
+                
                 team_row = {"id": team_id}
             else:
                 team_row = await fetchrow_dict(
@@ -155,14 +180,16 @@ async def create_team(body: TeamCreateRequest, auth: AuthContext = Depends(get_a
                 )
 
                 for user_id in user_ids:
+                    is_leader = (user_id == sender_user_id)
                     await conn.execute(
                         """
-                        INSERT INTO team_members (team_id, user_id)
-                        VALUES ($1, $2)
+                        INSERT INTO team_members (team_id, user_id, is_leader)
+                        VALUES ($1, $2, $3)
                         ON CONFLICT DO NOTHING
                         """,
                         team_row["id"],
                         user_id,
+                        is_leader,
                     )
                 
                 await conn.execute(
@@ -377,3 +404,316 @@ async def update_team(team_id: str, body: TeamUpdateRequest, auth: AuthContext =
         team = await _team_with_members(conn, team_id)
 
     return success_response(team)
+
+
+@router.patch("/teams/{team_id}/members/me/complete")
+async def mark_member_complete(team_id: str, body: TeamMemberCompleteRequest, auth: AuthContext = Depends(get_auth_context)):
+    async with db.connection(auth.user_id) as conn:
+        membership = await fetchrow_dict(
+            conn,
+            """
+            SELECT 1 AS ok
+            FROM team_members
+            WHERE team_id = $1 AND user_id = $2
+            """,
+            team_id,
+            auth.user_id,
+        )
+
+        if not membership:
+            raise AppError(code="FORBIDDEN", message="You are not a member of this team.", status_code=403)
+
+        async with conn.transaction():
+            await conn.execute(
+                """
+                UPDATE team_members
+                SET marked_complete = $1
+                WHERE team_id = $2 AND user_id = $3
+                """,
+                body.complete,
+                team_id,
+                auth.user_id,
+            )
+
+            incomplete_count = await fetchrow_dict(
+                conn,
+                """
+                SELECT COUNT(*) as count
+                FROM team_members
+                WHERE team_id = $1 AND marked_complete = false
+                """,
+                team_id,
+            )
+
+            all_complete = incomplete_count and incomplete_count["count"] == 0
+
+            await conn.execute(
+                """
+                UPDATE teams
+                SET completed = $1
+                WHERE id = $2
+                """,
+                all_complete,
+                team_id,
+            )
+            
+            await conn.execute(
+                """
+                UPDATE project_ideas
+                SET is_active = $1
+                WHERE team_id = $2
+                """,
+                not all_complete,
+                team_id,
+            )
+
+        team = await _team_with_members(conn, team_id)
+
+    return success_response(team)
+
+
+@router.delete("/teams/{team_id}/members/me")
+async def leave_team(team_id: str, auth: AuthContext = Depends(get_auth_context)):
+    async with db.connection(auth.user_id) as conn:
+        membership = await fetchrow_dict(
+            conn,
+            """
+            SELECT is_leader
+            FROM team_members
+            WHERE team_id = $1 AND user_id = $2
+            """,
+            team_id,
+            auth.user_id,
+        )
+
+        if not membership:
+            raise AppError(code="NOT_FOUND", message="You are not in this team.", status_code=404)
+
+        async with conn.transaction():
+            await conn.execute(
+                """
+                DELETE FROM team_members
+                WHERE team_id = $1 AND user_id = $2
+                """,
+                team_id,
+                auth.user_id,
+            )
+
+            remaining = await fetchrow_dict(
+                conn,
+                """
+                SELECT COUNT(*) as count
+                FROM team_members
+                WHERE team_id = $1
+                """,
+                team_id,
+            )
+
+            if remaining and remaining["count"] == 0:
+                await conn.execute(
+                    """
+                    UPDATE project_ideas
+                    SET team_id = NULL, is_active = true
+                    WHERE team_id = $1
+                    """,
+                    team_id,
+                )
+                await conn.execute("DELETE FROM teams WHERE id = $1", team_id)
+                
+                await conn.execute(
+                    """
+                    UPDATE project_ideas
+                    SET is_active = true
+                    WHERE user_id = $1 AND team_id IS NULL AND is_active = false
+                    """,
+                    auth.user_id,
+                )
+                return success_response({"deleted": True})
+            elif membership.get("is_leader"):
+                next_leader = await fetchrow_dict(
+                    conn,
+                    """
+                    SELECT user_id
+                    FROM team_members
+                    WHERE team_id = $1
+                    LIMIT 1
+                    """,
+                    team_id,
+                )
+                if next_leader:
+                    await conn.execute(
+                        """
+                        UPDATE team_members
+                        SET is_leader = true
+                        WHERE team_id = $1 AND user_id = $2
+                        """,
+                        team_id,
+                        next_leader["user_id"],
+                    )
+                
+            await conn.execute(
+                """
+                UPDATE project_ideas
+                SET is_active = true
+                WHERE user_id = $1 AND team_id IS NULL AND is_active = false
+                """,
+                auth.user_id,
+            )
+
+    return success_response({"deleted": False})
+
+
+@router.delete("/teams/{team_id}/members/{target_user_id}")
+async def kick_team_member(team_id: str, target_user_id: str, auth: AuthContext = Depends(get_auth_context)):
+    if target_user_id == "me" or target_user_id == auth.user_id:
+        raise AppError(code="BAD_REQUEST", message="Use the leave team action to remove yourself.", status_code=400)
+
+    async with db.connection(auth.user_id) as conn:
+        membership = await fetchrow_dict(
+            conn,
+            """
+            SELECT is_leader
+            FROM team_members
+            WHERE team_id = $1 AND user_id = $2
+            """,
+            team_id,
+            auth.user_id,
+        )
+
+        if not membership:
+            raise AppError(code="FORBIDDEN", message="You are not in this team.", status_code=403)
+            
+        if not membership.get("is_leader"):
+            raise AppError(code="FORBIDDEN", message="Only the team leader can kick members.", status_code=403)
+            
+        target_membership = await fetchrow_dict(
+            conn,
+            """
+            SELECT 1 AS ok
+            FROM team_members
+            WHERE team_id = $1 AND user_id = $2
+            """,
+            team_id,
+            target_user_id,
+        )
+
+        if not target_membership:
+            raise AppError(code="NOT_FOUND", message="The user is not in this team.", status_code=404)
+
+        async with conn.transaction():
+            await conn.execute(
+                """
+                DELETE FROM team_members
+                WHERE team_id = $1 AND user_id = $2
+                """,
+                team_id,
+                target_user_id,
+            )
+
+            incomplete_count = await fetchrow_dict(
+                conn,
+                """
+                SELECT COUNT(*) as count
+                FROM team_members
+                WHERE team_id = $1 AND marked_complete = false
+                """,
+                team_id,
+            )
+
+            all_complete = incomplete_count and incomplete_count["count"] == 0
+
+            await conn.execute(
+                """
+                UPDATE teams
+                SET completed = $1
+                WHERE id = $2
+                """,
+                all_complete,
+                team_id,
+            )
+            
+            await conn.execute(
+                """
+                UPDATE project_ideas
+                SET is_active = $1
+                WHERE team_id = $2
+                """,
+                not all_complete,
+                team_id,
+            )
+
+            await conn.execute(
+                """
+                UPDATE project_ideas
+                SET is_active = true
+                WHERE user_id = $1 AND team_id IS NULL AND is_active = false
+                """,
+                target_user_id,
+            )
+
+        team = await _team_with_members(conn, team_id)
+
+    return success_response(team)
+
+
+@router.post("/teams/{team_id}/ratings")
+async def rate_peer(team_id: str, body: PeerRatingRequest, auth: AuthContext = Depends(get_auth_context)):
+    async with db.connection(auth.user_id) as conn:
+        membership = await fetchrow_dict(
+            conn,
+            """
+            SELECT 1 AS ok
+            FROM team_members
+            WHERE team_id = $1 AND user_id = $2
+            """,
+            team_id,
+            auth.user_id,
+        )
+
+        if not membership:
+            raise AppError(code="FORBIDDEN", message="You are not a member of this team.", status_code=403)
+
+        target_membership = await fetchrow_dict(
+            conn,
+            """
+            SELECT 1 AS ok
+            FROM team_members
+            WHERE team_id = $1 AND user_id = $2
+            """,
+            team_id,
+            body.rated_user_id,
+        )
+
+        if not target_membership:
+            raise AppError(code="NOT_FOUND", message="User is not in this team.", status_code=404)
+            
+        team = await fetchrow_dict(conn, "SELECT completed FROM teams WHERE id = $1", team_id)
+        if not team or not team["completed"]:
+            raise AppError(code="BAD_REQUEST", message="You can only rate peers when the team is marked as completed.", status_code=400)
+
+        await conn.execute(
+            """
+            INSERT INTO peer_ratings (
+                rated_user_id, rater_user_id, team_id,
+                reliability, communication, contribution, overall_score
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (rated_user_id, rater_user_id, team_id)
+            DO UPDATE SET
+                reliability = EXCLUDED.reliability,
+                communication = EXCLUDED.communication,
+                contribution = EXCLUDED.contribution,
+                overall_score = EXCLUDED.overall_score
+            """,
+            body.rated_user_id,
+            auth.user_id,
+            team_id,
+            body.reliability,
+            body.communication,
+            body.contribution,
+            body.overall_score,
+        )
+        
+        updated_team = await _team_with_members(conn, team_id)
+        
+    return success_response(updated_team, status_code=201)

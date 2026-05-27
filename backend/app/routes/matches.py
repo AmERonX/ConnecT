@@ -10,15 +10,7 @@ from app.services.pagination import decode_cursor, next_cursor
 router = APIRouter(tags=["matches"])
 
 
-def _passes_hard_filters(viewer_idea: dict, candidate_idea: dict) -> bool:
-    # hard filter ±5 hours time commitments
-    viewer_hrs = viewer_idea.get("commitment_hrs")
-    candidate_hrs = candidate_idea.get("commitment_hrs")
-    if viewer_hrs is not None and candidate_hrs is not None:
-        if abs(viewer_hrs - candidate_hrs) > 5:
-            return False
-            
-    return True
+
 
 
 @router.get("/ideas/{idea_id}/matches")
@@ -102,24 +94,22 @@ async def list_matches_for_idea(
         """
 
         params = [idea_id, min_score]
-        if cursor_score is not None and cursor_id is not None:
-            query += " AND (m.final_score < $3 OR (m.final_score = $3 AND m.id > $4))"
-            params.extend([cursor_score, cursor_id])
-            order_index = 5
-        else:
-            order_index = 3
+        viewer_hrs = viewer_idea.get("commitment_hrs")
+        if viewer_hrs is not None:
+            params.append(viewer_hrs)
+            query += f" AND (pi.commitment_hrs IS NULL OR ABS(pi.commitment_hrs - ${len(params)}) <= 5)"
 
-        query += f" ORDER BY m.final_score DESC, m.id ASC LIMIT ${order_index}"
+        if cursor_score is not None and cursor_id is not None:
+            params.extend([cursor_score, cursor_id])
+            query += f" AND (m.final_score < ${len(params)-1} OR (m.final_score = ${len(params)-1} AND m.id > ${len(params)}))"
+
         params.append(min(limit * 5, 500))
+        query += f" ORDER BY m.final_score DESC, m.id ASC LIMIT ${len(params)}"
 
         rows = await fetch_dict(conn, query, *params)
 
         filtered = []
         for row in rows:
-            candidate_idea = {"commitment_hrs": row.get("commitment_hrs")}
-            if not _passes_hard_filters(viewer_idea, candidate_idea):
-                continue
-
             filtered.append(
                 {
                     "match_id": str(row["match_id"]),
@@ -147,19 +137,28 @@ async def list_matches_for_idea(
                 }
             )
 
-        total_row = await fetchrow_dict(
-            conn,
-            """
+        total_query = """
             SELECT COUNT(*)::int AS total
             FROM matches m
             JOIN match_participants mp ON mp.match_id = m.id
+            JOIN LATERAL (
+                SELECT pi2.*
+                FROM match_participants mp2
+                JOIN project_ideas pi2 ON pi2.id = mp2.idea_id
+                WHERE mp2.match_id = m.id AND mp2.idea_id != $1
+                LIMIT 1
+            ) pi ON true
             WHERE mp.idea_id = $1
               AND m.final_score IS NOT NULL
               AND m.final_score >= $2
-            """,
-            idea_id,
-            min_score,
-        )
+              AND pi.is_active = true
+        """
+        total_params = [idea_id, min_score]
+        if viewer_hrs is not None:
+            total_params.append(viewer_hrs)
+            total_query += f" AND (pi.commitment_hrs IS NULL OR ABS(pi.commitment_hrs - ${len(total_params)}) <= 5)"
+
+        total_row = await fetchrow_dict(conn, total_query, *total_params)
 
     items, next_token = next_cursor(filtered, limit)
     return success_response(

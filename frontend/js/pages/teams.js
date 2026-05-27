@@ -33,7 +33,10 @@ function renderTeams(data) {
       teams.length
         ? teams
             .map(
-              (team) => `
+              (team) => {
+                const myMember = (team.members || []).find(m => m.id === session.user.id);
+                const myPartComplete = myMember ? myMember.marked_complete : false;
+                return `
       <div class="team-card slide-up">
         <div class="team-card-header">
           <div class="team-info">
@@ -41,7 +44,7 @@ function renderTeams(data) {
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
                 <div class="team-name" id="team-name-text-${team.id}">${esc(team.name || 'Unnamed Team')}</div>
-                <button class="btn btn-ghost btn-sm" style="padding:0 6px;height:24px" data-action="edit-name" data-team-id="${team.id}">✏️ Edit Name</button>
+                ${team.completed ? '<span class="tag-chip" style="background:var(--green, #10b981);color:#fff">Completed</span>' : `<button class="btn btn-ghost btn-sm" style="padding:0 6px;height:24px" data-action="edit-name" data-team-id="${team.id}">✏️ Edit Name</button>`}
               </div>
               <div class="team-idea">Formed ${new Date(team.formed_at).toLocaleDateString()}</div>
             </div>
@@ -51,6 +54,20 @@ function renderTeams(data) {
               <span class="meta-value">${(team.members || []).length}</span>
               <span class="meta-label">Members</span>
             </div>
+            ${!team.completed ? `
+              <div class="team-actions" style="margin-left:16px">
+                ${myPartComplete 
+                  ? `<button class="btn btn-ghost btn-sm" data-action="unmark-complete" data-team-id="${team.id}">Reopen My Part</button>`
+                  : `<button class="btn btn-ghost btn-sm" data-action="mark-complete" data-team-id="${team.id}">Mark My Part Complete</button>`
+                }
+                <button class="btn btn-ghost btn-sm" style="color:var(--red)" data-action="leave-team" data-team-id="${team.id}">Leave</button>
+              </div>
+            ` : `
+              <div class="team-actions" style="margin-left:16px">
+                <button class="btn btn-ghost btn-sm" data-action="unmark-complete" data-team-id="${team.id}">Reopen Project</button>
+                <button class="btn btn-ghost btn-sm" style="color:var(--red)" data-action="leave-team" data-team-id="${team.id}">Leave</button>
+              </div>
+            `}
           </div>
         </div>
 
@@ -76,16 +93,30 @@ function renderTeams(data) {
             <div class="detail-title" style="margin-bottom:16px">Members</div>
             <div style="display:flex;flex-direction:column;gap:12px">
               ${(team.members || []).map(member => `
-                <div class="member-row" style="padding:0;border:none">
-                  <div class="avatar">${esc(firstLetter(member.name))}</div>
-                  <div class="member-name">${esc(member.name || 'Unknown member')}</div>
+                <div class="member-row" style="padding:0;border:none;justify-content:space-between">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div class="avatar">${esc(firstLetter(member.name))}</div>
+                    <div class="member-name" style="display:flex;align-items:center;gap:6px">
+                      ${esc(member.name || 'Unknown member')}
+                      ${member.marked_complete ? '<span style="color:var(--green,#10b981)" title="Ready">✓</span>' : ''}
+                      ${member.is_leader ? '<span class="tag-chip" style="font-size:0.7rem;padding:0 4px;background:rgba(245,158,11,0.15);color:var(--orange,#f59e0b)">👑 Leader</span>' : ''}
+                    </div>
+                  </div>
+                  ${team.completed && member.id !== session.user.id ? (
+                    member.rated_by_me 
+                    ? '<span style="font-size:0.8125rem;color:var(--green,#10b981)">✓ Rated</span>'
+                    : `<button class="btn btn-primary btn-sm" data-action="rate-peer" data-team-id="${team.id}" data-user-id="${member.id}" data-user-name="${esc(member.name)}">Rate Peer</button>`
+                  ) : (!team.completed && member.id !== session.user.id && myMember && myMember.is_leader ? (
+                    `<button class="btn btn-ghost btn-sm" style="color:var(--red);padding:0 6px;height:24px" data-action="kick-member" data-team-id="${team.id}" data-user-id="${member.id}">Kick</button>`
+                  ) : '')}
                 </div>
               `).join('')}
             </div>
           </div>
         </div>
       </div>
-    `,
+    `;
+              }
             )
             .join('')
         : '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">No teams yet</div><div class="empty-text">Accept a connection request to form your first team.</div></div>'
@@ -231,6 +262,107 @@ function renderTeams(data) {
         if (e.key === 'Escape') cancelBtn.click();
       });
     });
+  }
+
+  for (const button of container.querySelectorAll('button[data-action="mark-complete"]')) {
+    button.addEventListener('click', async () => {
+      button.setAttribute('disabled', 'disabled');
+      try {
+        await apiFetch(`/teams/${button.dataset.teamId}/members/me/complete`, { method: 'PATCH', body: { complete: true } });
+        await load();
+      } catch (error) {
+        showTeamsError(error.message || 'Failed to mark complete.');
+        button.removeAttribute('disabled');
+      }
+    });
+  }
+
+  for (const button of container.querySelectorAll('button[data-action="unmark-complete"]')) {
+    button.addEventListener('click', async () => {
+      button.setAttribute('disabled', 'disabled');
+      try {
+        await apiFetch(`/teams/${button.dataset.teamId}/members/me/complete`, { method: 'PATCH', body: { complete: false } });
+        await load();
+      } catch (error) {
+        showTeamsError(error.message || 'Failed to reopen project.');
+        button.removeAttribute('disabled');
+      }
+    });
+  }
+
+  for (const button of container.querySelectorAll('button[data-action="leave-team"]')) {
+    button.addEventListener('click', async () => {
+      button.setAttribute('disabled', 'disabled');
+      try {
+        await apiFetch(`/teams/${button.dataset.teamId}/members/me`, { method: 'DELETE' });
+        await load();
+      } catch (error) {
+        showTeamsError(error.message || 'Failed to leave team.');
+        button.removeAttribute('disabled');
+      }
+    });
+  }
+
+  for (const button of container.querySelectorAll('button[data-action="kick-member"]')) {
+    button.addEventListener('click', async () => {
+      button.setAttribute('disabled', 'disabled');
+      try {
+        await apiFetch(`/teams/${button.dataset.teamId}/members/${button.dataset.userId}`, { method: 'DELETE' });
+        await load();
+      } catch (error) {
+        showTeamsError(error.message || 'Failed to kick member.');
+        button.removeAttribute('disabled');
+      }
+    });
+  }
+
+  const modal = document.getElementById('peer-rating-modal');
+  const targetNameEl = document.getElementById('rating-target-name');
+  const form = document.getElementById('rating-form');
+  const cancelBtn = document.getElementById('cancel-rating');
+  const teamIdInput = document.getElementById('rating-team-id');
+  const userIdInput = document.getElementById('rating-user-id');
+
+  for (const button of container.querySelectorAll('button[data-action="rate-peer"]')) {
+    button.addEventListener('click', () => {
+      targetNameEl.textContent = button.dataset.userName;
+      teamIdInput.value = button.dataset.teamId;
+      userIdInput.value = button.dataset.userId;
+      form.reset();
+      modal.style.display = 'flex';
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.onclick = () => {
+      modal.style.display = 'none';
+    };
+  }
+
+  if (form) {
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submit-rating');
+      submitBtn.setAttribute('disabled', 'disabled');
+      
+      const payload = {
+        rated_user_id: userIdInput.value,
+        reliability: parseInt(document.getElementById('rating-reliability').value, 10),
+        communication: parseInt(document.getElementById('rating-communication').value, 10),
+        contribution: parseInt(document.getElementById('rating-contribution').value, 10),
+        overall_score: parseInt(document.getElementById('rating-overall').value, 10),
+      };
+
+      try {
+        await apiFetch(`/teams/${teamIdInput.value}/ratings`, { method: 'POST', body: payload });
+        modal.style.display = 'none';
+        await load();
+      } catch (error) {
+        alert(error.message || 'Failed to submit rating.');
+      } finally {
+        submitBtn.removeAttribute('disabled');
+      }
+    };
   }
 }
 
